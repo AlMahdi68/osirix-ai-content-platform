@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 smooth-transition">
         <div className="container flex h-20 items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -33,17 +33,17 @@ export default function Home() {
           </div>
           <nav className="flex items-center gap-4">
             <Link href="/plans">
-              <Button variant="ghost" className="text-foreground/80 hover:text-primary">
+              <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition">
                 Pricing
               </Button>
             </Link>
             <Link href="/login">
-              <Button variant="ghost" className="text-foreground/80 hover:text-primary">
+              <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition">
                 Login
               </Button>
             </Link>
             <Link href="/register">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gold-glow">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gold-glow smooth-transition hover:scale-105">
                 Get Started
               </Button>
             </Link>
@@ -59,12 +59,12 @@ export default function Home() {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
         </div>
 
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 smooth-transition hover:border-primary/50 hover:bg-primary/10">
           <Star className="h-4 w-4 text-primary animate-pulse" />
           <span className="text-sm text-primary font-medium">AI-Powered Content Creation Platform</span>
         </div>
 
-        <div className="flex max-w-4xl flex-col gap-6">
+        <div className="flex max-w-4xl flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h1 className="text-6xl sm:text-7xl font-bold tracking-tight leading-tight">
             Create <span className="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent gold-shimmer">Stunning AI Videos</span> in Minutes
           </h1>
@@ -74,29 +74,29 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "200ms" }}>
           <Link href="/register">
-            <Button size="lg" className="gap-2 text-lg px-8 py-6 bg-primary text-primary-foreground hover:bg-primary/90 gold-glow">
+            <Button size="lg" className="gap-2 text-lg px-8 py-6 bg-primary text-primary-foreground hover:bg-primary/90 gold-glow smooth-transition hover:scale-105 hover:shadow-2xl">
               Start Creating Free <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
           <Link href="/plans">
-            <Button size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 border-primary/30 hover:bg-primary/5">
+            <Button size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 border-primary/30 hover:bg-primary/5 smooth-transition hover:scale-105">
               View Pricing
             </Button>
           </Link>
         </div>
 
-        <div className="flex items-center gap-8 text-sm text-muted-foreground mt-8">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-8 text-sm text-muted-foreground mt-8 animate-in fade-in duration-700" style={{ animationDelay: "400ms" }}>
+          <div className="flex items-center gap-2 smooth-transition hover:text-primary">
             <Sparkles className="h-4 w-4 text-primary" />
             <span>No credit card required</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 smooth-transition hover:text-primary">
             <Zap className="h-4 w-4 text-primary" />
             <span>100 free credits</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 smooth-transition hover:text-primary">
             <Crown className="h-4 w-4 text-primary" />
             <span>Premium features</span>
           </div>
@@ -105,7 +105,7 @@ export default function Home() {
 
       {/* Features Grid */}
       <section className="container py-24">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h2 className="text-4xl font-bold mb-4">
             Everything You Need to <span className="text-primary">Dominate Content Creation</span>
           </h2>
@@ -115,8 +115,8 @@ export default function Home() {
         </div>
         
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group">
-            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "100ms" }}>
+            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors smooth-transition group-hover:scale-110">
               <Video className="h-8 w-8 text-primary" />
             </div>
             <h3 className="mb-3 text-2xl font-semibold">AI Video Generation</h3>
@@ -125,8 +125,8 @@ export default function Home() {
             </p>
           </Card>
           
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group">
-            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "200ms" }}>
+            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors smooth-transition group-hover:scale-110">
               <Mic className="h-8 w-8 text-primary" />
             </div>
             <h3 className="mb-3 text-2xl font-semibold">Text-to-Speech</h3>
@@ -135,8 +135,8 @@ export default function Home() {
             </p>
           </Card>
           
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group">
-            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "300ms" }}>
+            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors smooth-transition group-hover:scale-110">
               <ShoppingBag className="h-8 w-8 text-primary" />
             </div>
             <h3 className="mb-3 text-2xl font-semibold">Digital Marketplace</h3>
@@ -145,8 +145,8 @@ export default function Home() {
             </p>
           </Card>
           
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group">
-            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "400ms" }}>
+            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors smooth-transition group-hover:scale-110">
               <Calendar className="h-8 w-8 text-primary" />
             </div>
             <h3 className="mb-3 text-2xl font-semibold">Social Publishing</h3>
@@ -155,8 +155,8 @@ export default function Home() {
             </p>
           </Card>
           
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group">
-            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "500ms" }}>
+            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors smooth-transition group-hover:scale-110">
               <BarChart3 className="h-8 w-8 text-primary" />
             </div>
             <h3 className="mb-3 text-2xl font-semibold">Analytics Dashboard</h3>
@@ -165,8 +165,8 @@ export default function Home() {
             </p>
           </Card>
           
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group">
-            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/50 transition-all duration-300 hover:gold-glow group hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "600ms" }}>
+            <div className="mb-4 inline-flex p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors smooth-transition group-hover:scale-110">
               <Zap className="h-8 w-8 text-primary" />
             </div>
             <h3 className="mb-3 text-2xl font-semibold">Job Queue System</h3>
@@ -179,7 +179,7 @@ export default function Home() {
 
       {/* Pricing Preview */}
       <section className="container py-24">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h2 className="text-4xl font-bold mb-4">
             <span className="text-primary">Simple Pricing</span> for Every Creator
           </h2>
@@ -189,7 +189,7 @@ export default function Home() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/20 transition-all duration-300">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/20 transition-all duration-300 hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "100ms" }}>
             <h3 className="mb-2 text-2xl font-bold">Free</h3>
             <div className="mb-6">
               <span className="text-5xl font-bold">$0</span>
@@ -210,13 +210,13 @@ export default function Home() {
               </li>
             </ul>
             <Link href="/register">
-              <Button variant="outline" className="w-full">Get Started</Button>
+              <Button variant="outline" className="w-full smooth-transition hover:scale-105">Get Started</Button>
             </Link>
           </Card>
 
-          <Card className="p-8 bg-card border-primary/50 hover:border-primary transition-all duration-300 gold-glow relative overflow-hidden">
+          <Card className="p-8 bg-card border-primary/50 hover:border-primary transition-all duration-300 gold-glow relative overflow-hidden hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "200ms" }}>
             <div className="absolute top-4 right-4">
-              <span className="px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
+              <span className="px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full pulse-glow">
                 Popular
               </span>
             </div>
@@ -244,11 +244,11 @@ export default function Home() {
               </li>
             </ul>
             <Link href="/plans">
-              <Button className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
+              <Button className="w-full bg-primary hover:bg-primary/90 smooth-transition hover:scale-105">Get Started</Button>
             </Link>
           </Card>
 
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/20 transition-all duration-300">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/20 transition-all duration-300 hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "300ms" }}>
             <h3 className="mb-2 text-2xl font-bold">Pro</h3>
             <div className="mb-6">
               <span className="text-5xl font-bold">$29.99</span>
@@ -273,11 +273,11 @@ export default function Home() {
               </li>
             </ul>
             <Link href="/plans">
-              <Button className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
+              <Button className="w-full bg-primary hover:bg-primary/90 smooth-transition hover:scale-105">Get Started</Button>
             </Link>
           </Card>
 
-          <Card className="p-8 bg-card border-border/50 hover:border-primary/20 transition-all duration-300">
+          <Card className="p-8 bg-card border-border/50 hover:border-primary/20 transition-all duration-300 hover:scale-105 smooth-transition animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: "400ms" }}>
             <h3 className="mb-2 text-2xl font-bold">Enterprise</h3>
             <div className="mb-6">
               <span className="text-5xl font-bold">$99.99</span>
@@ -302,24 +302,24 @@ export default function Home() {
               </li>
             </ul>
             <Link href="/plans">
-              <Button className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
+              <Button className="w-full bg-primary hover:bg-primary/90 smooth-transition hover:scale-105">Get Started</Button>
             </Link>
           </Card>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="container py-24">
-        <Card className="relative p-16 text-center bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border-primary/30 overflow-hidden">
+      <section className="container py-24 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <Card className="relative p-16 text-center bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border-primary/30 overflow-hidden hover:border-primary/50 smooth-transition">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent gold-shimmer" />
           <div className="relative z-10">
-            <Crown className="h-16 w-16 text-primary mx-auto mb-6 gold-glow" />
+            <Crown className="h-16 w-16 text-primary mx-auto mb-6 gold-glow float-animation" />
             <h2 className="mb-4 text-4xl font-bold">Ready to Transform Your Content?</h2>
             <p className="mb-8 text-xl text-muted-foreground max-w-2xl mx-auto">
               Join thousands of creators using AI to scale their content business and reach millions
             </p>
             <Link href="/register">
-              <Button size="lg" className="gap-2 text-lg px-8 py-6 bg-primary hover:bg-primary/90 gold-glow">
+              <Button size="lg" className="gap-2 text-lg px-8 py-6 bg-primary hover:bg-primary/90 gold-glow smooth-transition hover:scale-105 hover:shadow-2xl">
                 Start Free Trial <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>

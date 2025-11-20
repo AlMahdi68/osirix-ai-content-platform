@@ -1,97 +1,64 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Check, Sparkles, ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles, ArrowLeft, Check, Zap } from "lucide-react";
 import Link from "next/link";
+import PlanBadge from "@/components/PlanBadge";
+import { PricingTable } from "@/components/autumn/pricing-table";
 
-interface Plan {
-  id: number;
-  name: string;
-  price: number;
-  creditsMonthly: number;
-  features: string[];
-  isActive: boolean;
-}
+const productDetails = [
+  {
+    id: "free",
+    description: "Perfect for getting started with AI content creation",
+  },
+  {
+    id: "starter",
+    description: "For creators who need more power",
+    recommendText: "Most Popular",
+  },
+  {
+    id: "pro",
+    description: "For professional content creators and marketers",
+  },
+  {
+    id: "enterprise",
+    description: "For teams and agencies with custom needs",
+  },
+];
 
 export default function PlansPage() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState<number | null>(null);
-
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
-  const fetchPlans = async () => {
-    try {
-      const response = await fetch("/api/plans");
-      if (response.ok) {
-        const data = await response.json();
-        setPlans(data.plans || []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch plans:", error);
-      toast.error("Failed to load plans");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubscribe = async (planId: number, planName: string) => {
-    if (!session?.user) {
-      toast.error("Please login to subscribe");
-      router.push("/login");
-      return;
-    }
-
-    setPurchasing(planId);
-    
-    try {
-      // In a real implementation, this would integrate with Stripe or another payment provider
-      toast.success(`Subscription to ${planName} plan initiated!`);
-      
-      // Simulate subscription success
-      setTimeout(() => {
-        toast.success(`Welcome to ${planName}!`);
-        router.push("/dashboard");
-      }, 2000);
-    } catch (error) {
-      toast.error("Subscription failed");
-    } finally {
-      setPurchasing(null);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b">
+      <header className="sticky top-0 z-40 border-b border-primary/20 bg-background/95 backdrop-blur">
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Osirix</span>
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <span className="text-2xl font-bold gold-gradient">Osirix</span>
           </Link>
           <div className="flex items-center gap-4">
             {session?.user ? (
-              <Link href="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
-              </Link>
+              <>
+                <PlanBadge />
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="hover:text-primary">Dashboard</Button>
+                </Link>
+              </>
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost">Login</Button>
+                  <Button variant="ghost" className="hover:text-primary">Login</Button>
                 </Link>
                 <Link href="/register">
-                  <Button>Get Started</Button>
+                  <Button className="gold-glow">Get Started</Button>
                 </Link>
               </>
             )}
@@ -101,123 +68,114 @@ export default function PlansPage() {
 
       {/* Content */}
       <main className="container py-12">
-        <div className="mb-8">
-          <Link href="/">
-            <Button variant="ghost" className="gap-2 mb-4">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-          <h1 className="text-4xl font-bold mb-2">Choose Your Plan</h1>
-          <p className="text-xl text-muted-foreground">
-            Select the perfect plan for your content creation needs
+        <div className="mb-12 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6">
+            <Zap className="h-4 w-4 text-primary" />
+            <span className="text-sm text-primary font-medium">Flexible Pricing</span>
+          </div>
+          
+          <h1 className="text-5xl font-bold mb-4 gold-gradient">Choose Your Plan</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Select the perfect plan for your content creation needs. All plans include core features.
           </p>
         </div>
 
-        {loading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <Skeleton className="h-8 w-24 mb-2" />
-                  <Skeleton className="h-12 w-32" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-40 w-full" />
-                </CardContent>
+        {/* Pricing Table */}
+        <div className="mb-16">
+          <PricingTable productDetails={productDetails} />
+        </div>
+
+        {/* Features Comparison */}
+        <div className="mt-20">
+          <h2 className="text-3xl font-bold mb-8 text-center gold-gradient">What's Included</h2>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                title: "AI Video Generation",
+                description: "Create professional videos with Wav2Lip lip-sync technology",
+                icon: Check
+              },
+              {
+                title: "Text-to-Speech",
+                description: "Natural-sounding voiceovers with ElevenLabs integration",
+                icon: Check
+              },
+              {
+                title: "Custom Avatars",
+                description: "Upload and manage your own AI avatars",
+                icon: Check
+              },
+              {
+                title: "Social Publishing",
+                description: "Schedule and auto-publish to all major platforms",
+                icon: Check
+              },
+              {
+                title: "Analytics Dashboard",
+                description: "Track performance and engagement metrics",
+                icon: Check
+              },
+              {
+                title: "Priority Support",
+                description: "Get help from our team when you need it (Pro+)",
+                icon: Check
+              },
+            ].map((feature, index) => (
+              <Card key={index} className="luxury-card p-6">
+                <div className="inline-flex p-2 rounded-lg bg-primary/10 mb-3">
+                  <feature.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
               </Card>
             ))}
           </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {plans.map((plan) => {
-              const isPopular = plan.name === "Starter";
-              return (
-                <Card key={plan.id} className={isPopular ? "border-primary shadow-lg" : ""}>
-                  {isPopular && (
-                    <div className="bg-primary text-primary-foreground text-center py-1 text-sm font-medium">
-                      Most Popular
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold">
-                        ${(plan.price / 100).toFixed(2)}
-                      </span>
-                      <span className="text-muted-foreground">/month</span>
-                    </div>
-                    <CardDescription className="mt-2">
-                      {plan.creditsMonthly} credits per month
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      className="w-full"
-                      variant={isPopular ? "default" : "outline"}
-                      onClick={() => handleSubscribe(plan.id, plan.name)}
-                      disabled={purchasing !== null}
-                    >
-                      {purchasing === plan.id ? "Processing..." : plan.price === 0 ? "Get Started" : "Subscribe"}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+        </div>
 
         {/* FAQ Section */}
-        <div className="mt-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+        <div className="mt-20">
+          <h2 className="text-3xl font-bold mb-8 text-center gold-gradient">Frequently Asked Questions</h2>
+          <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+            <Card className="luxury-card">
               <CardHeader>
-                <CardTitle>What are credits?</CardTitle>
+                <CardTitle className="text-lg">What are credits?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Credits are used to generate AI content. Different types of content require different amounts of credits. TTS typically uses 10 credits, videos use 50 credits, and lip-sync videos use 100 credits.
+                <p className="text-muted-foreground text-sm">
+                  Credits are used to generate AI content. Different types of content require different amounts of credits. TTS uses 10 credits, videos use 50 credits, and lip-sync videos use 100 credits.
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            
+            <Card className="luxury-card">
               <CardHeader>
-                <CardTitle>Can I upgrade or downgrade?</CardTitle>
+                <CardTitle className="text-lg">Can I upgrade or downgrade?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately and your billing will be prorated.
+                <p className="text-muted-foreground text-sm">
+                  Yes! You can change your plan at any time. Upgrades take effect immediately, and downgrades apply at the end of your billing period.
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            
+            <Card className="luxury-card">
               <CardHeader>
-                <CardTitle>Do unused credits roll over?</CardTitle>
+                <CardTitle className="text-lg">Do unused credits roll over?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Credits expire at the end of each billing period. We recommend using them before your renewal date. Upgrade to a higher tier for more credits.
+                <p className="text-muted-foreground text-sm">
+                  Credits reset at the beginning of each billing period. We recommend using them before renewal to get the most value from your plan.
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            
+            <Card className="luxury-card">
               <CardHeader>
-                <CardTitle>What payment methods do you accept?</CardTitle>
+                <CardTitle className="text-lg">What payment methods are accepted?</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  We accept all major credit cards, debit cards, and PayPal. All payments are processed securely through Stripe.
+                <p className="text-muted-foreground text-sm">
+                  We accept all major credit cards through Stripe. All payments are processed securely with industry-standard encryption.
                 </p>
               </CardContent>
             </Card>

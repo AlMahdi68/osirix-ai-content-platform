@@ -25,9 +25,10 @@ import {
   Settings,
   LogOut,
   Loader2,
-  Coins,
+  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
+import PlanBadge from "@/components/PlanBadge";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -42,36 +43,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { data: session, isPending, refetch } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const [credits, setCredits] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isPending && !session?.user) {
       router.push("/login");
     }
   }, [session, isPending, router]);
-
-  useEffect(() => {
-    if (session?.user) {
-      fetchCredits();
-    }
-  }, [session]);
-
-  const fetchCredits = async () => {
-    try {
-      const token = localStorage.getItem("bearer_token");
-      const response = await fetch("/api/credits/balance", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCredits(data.balance);
-      }
-    } catch (error) {
-      console.error("Failed to fetch credits:", error);
-    }
-  };
 
   const handleSignOut = async () => {
     const token = localStorage.getItem("bearer_token");
@@ -96,7 +73,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -106,13 +83,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return null;
   }
 
+  const isAdmin = session.user.email === "admin@osirix.com";
+
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-card">
-        <div className="flex h-16 items-center gap-2 border-b px-6">
-          <Sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">Osirix</span>
+      <aside className="w-64 border-r border-primary/20 bg-card/50 backdrop-blur">
+        <div className="flex h-16 items-center gap-2 border-b border-primary/20 px-6">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <span className="text-xl font-bold gold-gradient">Osirix</span>
         </div>
 
         <nav className="space-y-1 p-4">
@@ -122,7 +103,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link key={item.name} href={item.href}>
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
-                  className="w-full justify-start gap-2"
+                  className={`w-full justify-start gap-2 ${isActive ? 'bg-primary/10 text-primary border border-primary/30' : 'hover:bg-primary/5 hover:text-primary'}`}
                 >
                   <item.icon className="h-4 w-4" />
                   {item.name}
@@ -130,61 +111,66 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             );
           })}
+          
+          {isAdmin && (
+            <Link href="/admin">
+              <Button
+                variant={pathname === "/admin" ? "secondary" : "ghost"}
+                className={`w-full justify-start gap-2 ${pathname === "/admin" ? 'bg-primary/10 text-primary border border-primary/30' : 'hover:bg-primary/5 hover:text-primary'}`}
+              >
+                <Shield className="h-4 w-4" />
+                Admin Panel
+              </Button>
+            </Link>
+          )}
         </nav>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="mb-2 rounded-lg bg-muted p-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Coins className="h-4 w-4 text-primary" />
-              <span className="font-medium">
-                {credits !== null ? `${credits} Credits` : "Loading..."}
-              </span>
-            </div>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b px-6">
+        <header className="flex h-16 items-center justify-between border-b border-primary/20 px-6 bg-card/30 backdrop-blur">
           <h1 className="text-xl font-semibold">
             {navigation.find((item) => item.href === pathname)?.name || "Dashboard"}
           </h1>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={session.user.image || undefined} />
-                  <AvatarFallback>
-                    {session.user.name?.charAt(0).toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="hidden md:inline">{session.user.name}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">{session.user.name}</p>
-                  <p className="text-xs text-muted-foreground">{session.user.email}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-3">
+            <PlanBadge />
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2 hover:bg-primary/5">
+                  <Avatar className="h-8 w-8 border-2 border-primary/30">
+                    <AvatarImage src={session.user.image || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {session.user.name?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:inline">{session.user.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{session.user.name}</p>
+                    <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
 
         {/* Page Content */}

@@ -12,9 +12,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Calendar, Send, Twitter, Facebook, Instagram, Linkedin, Clock, CheckCircle, XCircle, Edit2, Trash2, MoreVertical } from "lucide-react";
+import { Plus, Calendar, Send, Twitter, Facebook, Instagram, Linkedin, Clock, CheckCircle, XCircle, Edit2, Trash2, MoreVertical, Lock } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useCustomer } from "autumn-js/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface SocialPost {
   id: number;
@@ -35,10 +38,24 @@ export default function SocialPage() {
   const [editingPost, setEditingPost] = useState<SocialPost | null>(null);
   const [deletePostId, setDeletePostId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const { check, isLoading: checkingAccess } = useCustomer();
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
+    checkFeatureAccess();
     fetchPosts();
   }, []);
+
+  const checkFeatureAccess = async () => {
+    try {
+      const { data } = await check({ featureId: "social_scheduling" });
+      setHasAccess(data.allowed);
+    } catch (error) {
+      console.error("Failed to check access:", error);
+      setHasAccess(false);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
@@ -170,6 +187,18 @@ export default function SocialPage() {
     }
   };
 
+  const handleScheduleClick = async () => {
+    if (checkingAccess || hasAccess === null) return;
+    
+    if (!hasAccess) {
+      toast.error("Social scheduling requires a paid plan");
+      router.push("/plans");
+      return;
+    }
+    
+    setDialogOpen(true);
+  };
+
   const openEditDialog = (post: SocialPost) => {
     setEditingPost(post);
     setDialogOpen(true);
@@ -208,6 +237,46 @@ export default function SocialPage() {
     }
   };
 
+  if (checkingAccess || hasAccess === null) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Checking access...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Card className="max-w-md border-dashed">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-2">
+                <Lock className="h-6 w-6 text-muted-foreground" />
+                <CardTitle>Premium Feature</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Social media scheduling is available on Starter plan and above. Upgrade to unlock this feature.
+              </p>
+              <Link href="/plans">
+                <Button className="w-full">
+                  Upgrade to Starter Plan
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -221,7 +290,7 @@ export default function SocialPage() {
             if (!open) setEditingPost(null);
           }}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={handleScheduleClick}>
                 <Plus className="h-4 w-4" />
                 Schedule Post
               </Button>

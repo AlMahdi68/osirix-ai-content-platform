@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart, Search, Filter, TrendingUp, Package } from "lucide-react";
+import { ShoppingCart, Search, Filter, TrendingUp, Package, Lock } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useCustomer } from "autumn-js/react";
 
 interface Product {
   id: number;
@@ -29,10 +30,23 @@ export default function MarketplacePage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const { check, isLoading: checkingAccess } = useCustomer();
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
+    checkFeatureAccess();
     fetchProducts();
   }, []);
+
+  const checkFeatureAccess = async () => {
+    try {
+      const { data } = await check({ featureId: "marketplace_access" });
+      setHasAccess(data.allowed);
+    } catch (error) {
+      console.error("Failed to check access:", error);
+      setHasAccess(false);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -92,6 +106,46 @@ export default function MarketplacePage() {
     { value: "backgrounds", label: "Backgrounds" },
     { value: "music", label: "Music" },
   ];
+
+  if (checkingAccess || hasAccess === null) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Checking access...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Card className="max-w-md border-dashed">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-2">
+                <Lock className="h-6 w-6 text-muted-foreground" />
+                <CardTitle>Premium Feature</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Marketplace access is available on Pro plan and above. Upgrade to buy and sell digital products.
+              </p>
+              <Link href="/plans">
+                <Button className="w-full">
+                  Upgrade to Pro Plan
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

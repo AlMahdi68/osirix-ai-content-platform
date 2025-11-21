@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Users, Loader2, Trash2, Eye, Sparkles, LayoutDashboard } from "lucide-react";
+import { Users, Loader2, Trash2, Eye, Sparkles, LayoutDashboard, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface AICharacter {
@@ -29,6 +29,105 @@ interface AICharacter {
   createdAt: string;
 }
 
+const characterTemplates = [
+  {
+    id: "professional-presenter",
+    name: "Professional Presenter",
+    gradient: "from-blue-600 to-cyan-500",
+    icon: "👔",
+    personality: "Confident, articulate, and authoritative. Speaks with clarity and commands attention.",
+    backstory: "Former news anchor with 15 years of broadcasting experience. Master of clear communication and audience engagement.",
+    voiceStyle: "Professional, clear, well-paced",
+    traits: ["Confident", "Articulate", "Professional", "Engaging", "Trustworthy"],
+    useCases: ["Corporate presentations", "Product demos", "Training videos"],
+    examples: [
+      "Business webinars and presentations",
+      "Product launch announcements",
+      "Professional training content"
+    ]
+  },
+  {
+    id: "friendly-educator",
+    name: "Friendly Educator",
+    gradient: "from-green-500 to-emerald-500",
+    icon: "🎓",
+    personality: "Warm, patient, and encouraging. Makes complex topics easy to understand with enthusiasm.",
+    backstory: "Award-winning teacher passionate about making learning fun and accessible for everyone.",
+    voiceStyle: "Warm, enthusiastic, patient",
+    traits: ["Patient", "Encouraging", "Clear", "Enthusiastic", "Supportive"],
+    useCases: ["Educational content", "Tutorials", "Explainer videos"],
+    examples: [
+      "Online course instruction",
+      "How-to tutorials and guides",
+      "Educational explainer videos"
+    ]
+  },
+  {
+    id: "energetic-host",
+    name: "Energetic Host",
+    gradient: "from-orange-500 to-red-500",
+    icon: "🎬",
+    personality: "Dynamic, charismatic, and entertaining. Brings energy and excitement to every moment.",
+    backstory: "Popular YouTuber and content creator known for keeping audiences engaged and entertained.",
+    voiceStyle: "Energetic, dynamic, expressive",
+    traits: ["Charismatic", "Energetic", "Fun", "Engaging", "Dynamic"],
+    useCases: ["Entertainment content", "Vlogs", "Social media"],
+    examples: [
+      "YouTube channel hosting",
+      "Entertainment vlogs",
+      "Social media content"
+    ]
+  },
+  {
+    id: "calming-narrator",
+    name: "Calming Narrator",
+    gradient: "from-purple-500 to-indigo-500",
+    icon: "🎙️",
+    personality: "Soothing, contemplative, and serene. Creates a peaceful atmosphere with every word.",
+    backstory: "Meditation guide and audiobook narrator with a gift for creating tranquil experiences.",
+    voiceStyle: "Calm, soothing, measured",
+    traits: ["Soothing", "Peaceful", "Contemplative", "Gentle", "Serene"],
+    useCases: ["Meditation", "Audiobooks", "Relaxation content"],
+    examples: [
+      "Meditation and mindfulness guides",
+      "Audiobook narration",
+      "Sleep and relaxation content"
+    ]
+  },
+  {
+    id: "tech-expert",
+    name: "Tech Expert",
+    gradient: "from-cyan-500 to-blue-700",
+    icon: "💻",
+    personality: "Knowledgeable, precise, and innovative. Explains technology with clarity and expertise.",
+    backstory: "Senior software engineer and tech reviewer with deep expertise in cutting-edge technology.",
+    voiceStyle: "Precise, knowledgeable, clear",
+    traits: ["Expert", "Analytical", "Precise", "Innovative", "Clear"],
+    useCases: ["Tech reviews", "Software tutorials", "Developer content"],
+    examples: [
+      "Technology reviews and analysis",
+      "Software development tutorials",
+      "Tech industry updates"
+    ]
+  },
+  {
+    id: "motivational-coach",
+    name: "Motivational Coach",
+    gradient: "from-yellow-500 to-amber-600",
+    icon: "💪",
+    personality: "Inspiring, empowering, and uplifting. Motivates people to achieve their best potential.",
+    backstory: "Life coach and motivational speaker dedicated to helping people unlock their full potential.",
+    voiceStyle: "Inspiring, powerful, uplifting",
+    traits: ["Inspiring", "Empowering", "Passionate", "Supportive", "Driven"],
+    useCases: ["Motivational content", "Coaching", "Personal development"],
+    examples: [
+      "Motivational speeches and content",
+      "Personal development coaching",
+      "Fitness and wellness motivation"
+    ]
+  }
+];
+
 export default function AICharactersPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
@@ -37,6 +136,8 @@ export default function AICharactersPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [previewCharacter, setPreviewCharacter] = useState<AICharacter | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<typeof characterTemplates[0] | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -85,6 +186,21 @@ export default function AICharactersPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleUseTemplate = (template: typeof characterTemplates[0]) => {
+    setFormData({
+      name: template.name,
+      personality: template.personality,
+      backstory: template.backstory,
+      voiceStyle: template.voiceStyle,
+      traits: template.traits.join(", "),
+      useCases: template.useCases.join(", "),
+    });
+    setShowTemplates(false);
+    setShowForm(true);
+    setPreviewTemplate(null);
+    toast.success("Template applied! Customize and create.");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -195,6 +311,14 @@ export default function AICharactersPage() {
             >
               <LayoutDashboard className="mr-2 h-5 w-5" />
               Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => setShowTemplates(true)}
+              variant="outline"
+              className="border-primary/30"
+            >
+              <Eye className="mr-2 h-5 w-5" />
+              View Templates
             </Button>
             <Button
               onClick={() => setShowForm(!showForm)}
@@ -326,12 +450,18 @@ export default function AICharactersPage() {
             <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No characters yet</h3>
             <p className="text-muted-foreground mb-4">
-              Create your first AI character
+              Create your first AI character or explore our templates
             </p>
-            <Button onClick={() => setShowForm(true)} variant="outline">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Create Character
-            </Button>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => setShowTemplates(true)} variant="outline">
+                <Eye className="mr-2 h-4 w-4" />
+                View Templates
+              </Button>
+              <Button onClick={() => setShowForm(true)}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Create Character
+              </Button>
+            </div>
           </Card>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -403,7 +533,137 @@ export default function AICharactersPage() {
           </div>
         )}
 
-        {/* Preview Dialog */}
+        {/* Templates Gallery Dialog */}
+        <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-2xl">
+                <Zap className="h-6 w-6 text-primary" />
+                Character Templates
+              </DialogTitle>
+              <p className="text-muted-foreground">
+                Explore professional character archetypes and personalities
+              </p>
+            </DialogHeader>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4">
+              {characterTemplates.map((template) => (
+                <Card
+                  key={template.id}
+                  className="overflow-hidden hover:border-primary/50 transition-all duration-300 group cursor-pointer"
+                  onClick={() => setPreviewTemplate(template)}
+                >
+                  <div className={`h-32 bg-gradient-to-br ${template.gradient} relative flex flex-col items-center justify-center text-white`}>
+                    <div className="text-5xl mb-2">{template.icon}</div>
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold mb-2 text-lg group-hover:text-primary transition-colors">
+                      {template.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {template.personality}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {template.traits.slice(0, 3).map((trait, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-primary/10 text-primary text-xs rounded"
+                        >
+                          {trait}
+                        </span>
+                      ))}
+                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUseTemplate(template);
+                      }}
+                    >
+                      <Sparkles className="mr-2 h-3 w-3" />
+                      Use Template
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Template Preview Dialog */}
+        <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <div className={`-mx-6 -mt-6 mb-6 h-48 bg-gradient-to-br ${previewTemplate?.gradient} flex items-center justify-center`}>
+                <div className="text-center text-white">
+                  <div className="text-6xl mb-4">{previewTemplate?.icon}</div>
+                  <DialogTitle className="text-3xl font-bold">{previewTemplate?.name}</DialogTitle>
+                  <p className="text-sm mt-2 opacity-90">{previewTemplate?.voiceStyle}</p>
+                </div>
+              </div>
+            </DialogHeader>
+            {previewTemplate && (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Personality</p>
+                  <p className="text-base">{previewTemplate.personality}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Backstory</p>
+                  <p className="text-base">{previewTemplate.backstory}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Character Traits</p>
+                  <div className="flex flex-wrap gap-2">
+                    {previewTemplate.traits.map((trait, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
+                      >
+                        {trait}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Ideal Use Cases</p>
+                  <ul className="space-y-2">
+                    {previewTemplate.examples.map((example, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{example}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Best For</p>
+                  <div className="flex flex-wrap gap-2">
+                    {previewTemplate.useCases.map((useCase, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full"
+                      >
+                        {useCase}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => handleUseTemplate(previewTemplate)}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Use This Template
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Character Preview Dialog */}
         <Dialog open={!!previewCharacter} onOpenChange={() => setPreviewCharacter(null)}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>

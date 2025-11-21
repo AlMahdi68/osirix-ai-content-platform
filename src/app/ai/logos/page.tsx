@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Wand2, Loader2, Palette, Trash2, Download, LayoutDashboard, Eye } from "lucide-react";
+import { Wand2, Loader2, Palette, Trash2, Download, LayoutDashboard, Eye, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface AILogo {
@@ -35,6 +35,87 @@ interface AILogo {
   createdAt: string;
 }
 
+const logoTemplates = [
+  {
+    id: "modern-tech",
+    name: "Modern Tech",
+    style: "modern",
+    colors: ["#FFD700", "#000000", "#FFFFFF"],
+    gradient: "from-yellow-400 to-amber-600",
+    prompt: "Sleek modern tech company logo with geometric shapes, clean lines, and minimal design",
+    examples: [
+      "Abstract geometric cube representing innovation",
+      "Interconnected nodes symbolizing connectivity",
+      "Forward-leaning arrow with circuit patterns"
+    ]
+  },
+  {
+    id: "vintage-classic",
+    name: "Vintage Classic",
+    style: "vintage",
+    colors: ["#8B4513", "#F5DEB3", "#2F4F4F"],
+    gradient: "from-amber-700 to-orange-900",
+    prompt: "Vintage badge-style logo with ornate borders, classic typography, and timeless elegance",
+    examples: [
+      "Circular emblem with decorative flourishes",
+      "Retro ribbon banner with serif typography",
+      "Victorian-style monogram with ornaments"
+    ]
+  },
+  {
+    id: "minimalist-clean",
+    name: "Minimalist Clean",
+    style: "minimalist",
+    colors: ["#000000", "#FFFFFF", "#808080"],
+    gradient: "from-gray-300 to-gray-600",
+    prompt: "Ultra-minimalist logo with simple shapes, negative space, and zen-like simplicity",
+    examples: [
+      "Single continuous line forming abstract shape",
+      "Negative space revealing hidden symbol",
+      "Simple letter mark with perfect proportions"
+    ]
+  },
+  {
+    id: "abstract-creative",
+    name: "Abstract Creative",
+    style: "abstract",
+    colors: ["#FF00FF", "#00FFFF", "#FFD700"],
+    gradient: "from-purple-500 via-pink-500 to-cyan-500",
+    prompt: "Bold abstract design with fluid shapes, dynamic movement, and artistic expression",
+    examples: [
+      "Flowing liquid shapes creating organic form",
+      "Intersecting geometric abstractions",
+      "Gradient morphing abstract composition"
+    ]
+  },
+  {
+    id: "geometric-precision",
+    name: "Geometric Precision",
+    style: "geometric",
+    colors: ["#4169E1", "#FF6347", "#FFD700"],
+    gradient: "from-blue-500 to-indigo-700",
+    prompt: "Precise geometric logo with perfect angles, mathematical harmony, and structural balance",
+    examples: [
+      "Sacred geometry hexagonal pattern",
+      "Isometric cube with golden ratio",
+      "Tessellating triangular formation"
+    ]
+  },
+  {
+    id: "organic-natural",
+    name: "Organic Natural",
+    style: "organic",
+    colors: ["#228B22", "#8FBC8F", "#F0E68C"],
+    gradient: "from-green-500 to-emerald-700",
+    prompt: "Flowing organic logo inspired by nature, with soft curves, leaf motifs, and natural harmony",
+    examples: [
+      "Stylized leaf with flowing curves",
+      "Tree silhouette with root system",
+      "Wave patterns mimicking natural flow"
+    ]
+  }
+];
+
 export default function AILogosPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
@@ -43,6 +124,8 @@ export default function AILogosPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [previewLogo, setPreviewLogo] = useState<AILogo | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<typeof logoTemplates[0] | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -133,6 +216,19 @@ export default function AILogosPage() {
     }
   };
 
+  const handleUseTemplate = (template: typeof logoTemplates[0]) => {
+    setFormData({
+      name: `${template.name} Logo`,
+      prompt: template.prompt,
+      style: template.style,
+      colors: template.colors.join(", "),
+    });
+    setShowTemplates(false);
+    setShowForm(true);
+    setPreviewTemplate(null);
+    toast.success("Template applied! Customize and generate.");
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this logo?")) return;
 
@@ -186,6 +282,14 @@ export default function AILogosPage() {
             >
               <LayoutDashboard className="mr-2 h-5 w-5" />
               Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => setShowTemplates(true)}
+              variant="outline"
+              className="border-primary/30"
+            >
+              <Eye className="mr-2 h-5 w-5" />
+              View Templates
             </Button>
             <Button
               onClick={() => setShowForm(!showForm)}
@@ -299,12 +403,18 @@ export default function AILogosPage() {
             <Palette className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No logos yet</h3>
             <p className="text-muted-foreground mb-4">
-              Generate your first AI-powered logo
+              Generate your first AI-powered logo or explore our templates
             </p>
-            <Button onClick={() => setShowForm(true)} variant="outline">
-              <Wand2 className="mr-2 h-4 w-4" />
-              Generate Logo
-            </Button>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => setShowTemplates(true)} variant="outline">
+                <Eye className="mr-2 h-4 w-4" />
+                View Templates
+              </Button>
+              <Button onClick={() => setShowForm(true)}>
+                <Wand2 className="mr-2 h-4 w-4" />
+                Generate Logo
+              </Button>
+            </div>
           </Card>
         ) : (
           <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
@@ -387,7 +497,119 @@ export default function AILogosPage() {
           </div>
         )}
 
-        {/* Preview Dialog */}
+        {/* Templates Gallery Dialog */}
+        <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-2xl">
+                <Sparkles className="h-6 w-6 text-primary" />
+                Logo Style Templates
+              </DialogTitle>
+              <p className="text-muted-foreground">
+                Explore professional logo styles and get inspired
+              </p>
+            </DialogHeader>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4">
+              {logoTemplates.map((template) => (
+                <Card
+                  key={template.id}
+                  className="overflow-hidden hover:border-primary/50 transition-all duration-300 group cursor-pointer"
+                  onClick={() => setPreviewTemplate(template)}
+                >
+                  <div className={`h-32 bg-gradient-to-br ${template.gradient} relative flex items-center justify-center`}>
+                    <Palette className="h-16 w-16 text-white/80" />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold mb-2 text-lg group-hover:text-primary transition-colors">
+                      {template.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {template.prompt}
+                    </p>
+                    <div className="flex gap-1.5 mb-3">
+                      {template.colors.map((color, idx) => (
+                        <div
+                          key={idx}
+                          className="w-8 h-8 rounded-md border-2 border-white shadow-sm"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUseTemplate(template);
+                      }}
+                    >
+                      <Wand2 className="mr-2 h-3 w-3" />
+                      Use Template
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Template Preview Dialog */}
+        <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <div className={`-mx-6 -mt-6 mb-6 h-48 bg-gradient-to-br ${previewTemplate?.gradient} flex items-center justify-center`}>
+                <div className="text-center text-white">
+                  <Palette className="h-20 w-20 mx-auto mb-4 opacity-90" />
+                  <DialogTitle className="text-3xl font-bold">{previewTemplate?.name}</DialogTitle>
+                </div>
+              </div>
+            </DialogHeader>
+            {previewTemplate && (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Style Description</p>
+                  <p className="text-base">{previewTemplate.prompt}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Color Palette</p>
+                  <div className="flex gap-3">
+                    {previewTemplate.colors.map((color, idx) => (
+                      <div key={idx} className="flex flex-col items-center gap-2">
+                        <div
+                          className="w-16 h-16 rounded-lg border-2 border-border shadow-md"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-xs font-mono">{color}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Example Concepts</p>
+                  <ul className="space-y-2">
+                    {previewTemplate.examples.map((example, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{example}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => handleUseTemplate(previewTemplate)}
+                >
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  Use This Template
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Logo Preview Dialog */}
         <Dialog open={!!previewLogo} onOpenChange={() => setPreviewLogo(null)}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>

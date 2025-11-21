@@ -16,7 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TrendingUp, Loader2, Trash2, Eye, Sparkles, Play, Pause } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { TrendingUp, Loader2, Trash2, Eye, Sparkles, Play, Pause, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 
 interface AICampaign {
@@ -47,6 +53,7 @@ export default function AICampaignsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [previewCampaign, setPreviewCampaign] = useState<AICampaign | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -228,13 +235,23 @@ export default function AICampaignsPage() {
               Plan and execute marketing campaigns with AI
             </p>
           </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-primary hover:bg-primary/90 gold-glow"
-          >
-            <Sparkles className="mr-2 h-5 w-5" />
-            Create Campaign
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => router.push("/dashboard")}
+              variant="outline"
+              className="border-primary/30"
+            >
+              <LayoutDashboard className="mr-2 h-5 w-5" />
+              Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-primary hover:bg-primary/90 gold-glow"
+            >
+              <Sparkles className="mr-2 h-5 w-5" />
+              Create Campaign
+            </Button>
+          </div>
         </div>
 
         {showForm && (
@@ -444,10 +461,10 @@ export default function AICampaignsPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => router.push(`/ai/campaigns/${campaign.id}`)}
+                    onClick={() => setPreviewCampaign(campaign)}
                   >
                     <Eye className="mr-1 h-3 w-3" />
-                    View Details
+                    Preview
                   </Button>
                   {campaign.status === "planning" && (
                     <Button
@@ -481,6 +498,75 @@ export default function AICampaignsPage() {
             ))}
           </div>
         )}
+
+        {/* Preview Dialog */}
+        <Dialog open={!!previewCampaign} onOpenChange={() => setPreviewCampaign(null)}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                {previewCampaign?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {previewCampaign && (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Campaign Goal</p>
+                  <p>{previewCampaign.goal}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Target Audience</p>
+                  <p>{previewCampaign.targetAudience}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Platforms</p>
+                  <div className="flex flex-wrap gap-2">
+                    {previewCampaign.platforms.map((platform) => (
+                      <span
+                        key={platform}
+                        className="px-3 py-1 bg-primary/10 text-primary rounded-full capitalize"
+                      >
+                        {platform}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Content Strategy</p>
+                  <p className="text-sm">{previewCampaign.contentStrategy}</p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Budget</p>
+                    <p className="text-2xl font-bold text-primary">
+                      ${(previewCampaign.budget / 100).toFixed(2)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Posting Schedule</p>
+                    <p>{previewCampaign.postingSchedule.postsPerDay} posts per day</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Status</p>
+                  <span
+                    className={`px-3 py-1 rounded text-sm font-medium capitalize ${
+                      previewCampaign.status === "active"
+                        ? "bg-primary/20 text-primary"
+                        : previewCampaign.status === "completed"
+                        ? "bg-green-500/20 text-green-500"
+                        : previewCampaign.status === "paused"
+                        ? "bg-yellow-500/20 text-yellow-500"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {previewCampaign.status}
+                  </span>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

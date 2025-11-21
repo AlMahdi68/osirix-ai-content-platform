@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Bot, Loader2, Activity, Zap, TrendingUp, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Bot, Loader2, Activity, Zap, TrendingUp, CheckCircle2, XCircle, Clock, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 
 interface AgentStatus {
@@ -173,14 +173,24 @@ export default function AIManagerPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Bot className="h-10 w-10 text-primary gold-glow" />
-            AI Manager Dashboard
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Autonomous AI agent managing your content and campaigns
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+              <Bot className="h-10 w-10 text-primary gold-glow" />
+              AI Manager Dashboard
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Autonomous AI agent managing your content and campaigns
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push("/dashboard")}
+            variant="outline"
+            className="border-primary/30"
+          >
+            <LayoutDashboard className="mr-2 h-5 w-5" />
+            Back to Dashboard
+          </Button>
         </div>
 
         {/* Control Panel */}

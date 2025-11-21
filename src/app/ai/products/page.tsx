@@ -15,7 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Loader2, Package, Trash2, Edit, Eye } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Sparkles, Loader2, Package, Trash2, Edit, Eye, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 
 interface AIProduct {
@@ -38,6 +44,7 @@ export default function AIProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [previewProduct, setPreviewProduct] = useState<AIProduct | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -183,13 +190,23 @@ export default function AIProductsPage() {
               Generate product ideas with AI-powered descriptions and marketing copy
             </p>
           </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-primary hover:bg-primary/90 gold-glow"
-          >
-            <Sparkles className="mr-2 h-5 w-5" />
-            Create New Product
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => router.push("/dashboard")}
+              variant="outline"
+              className="border-primary/30"
+            >
+              <LayoutDashboard className="mr-2 h-5 w-5" />
+              Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-primary hover:bg-primary/90 gold-glow"
+            >
+              <Sparkles className="mr-2 h-5 w-5" />
+              Create New Product
+            </Button>
+          </div>
         </div>
 
         {showForm && (
@@ -410,10 +427,10 @@ export default function AIProductsPage() {
                     size="sm"
                     variant="outline"
                     className="flex-1"
-                    onClick={() => router.push(`/ai/products/${product.id}`)}
+                    onClick={() => setPreviewProduct(product)}
                   >
                     <Eye className="mr-1 h-3 w-3" />
-                    View
+                    Preview
                   </Button>
                   <Button
                     size="sm"
@@ -427,6 +444,54 @@ export default function AIProductsPage() {
             ))}
           </div>
         )}
+
+        {/* Preview Dialog */}
+        <Dialog open={!!previewProduct} onOpenChange={() => setPreviewProduct(null)}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-primary" />
+                {previewProduct?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {previewProduct && (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Description</p>
+                  <p>{previewProduct.description}</p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Category</p>
+                    <p className="capitalize">{previewProduct.category.replace("-", " ")}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Price</p>
+                    <p className="text-2xl font-bold text-primary">
+                      ${(previewProduct.priceSuggestion / 100).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Target Audience</p>
+                  <p>{previewProduct.targetAudience}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Key Features</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {previewProduct.keyFeatures.map((feature, idx) => (
+                      <li key={idx}>{feature}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Marketing Copy</p>
+                  <p className="text-sm">{previewProduct.marketingCopy}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

@@ -15,7 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Wand2, Loader2, Palette, Trash2, Download, Home } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Wand2, Loader2, Palette, Trash2, Download, LayoutDashboard, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 interface AILogo {
@@ -36,6 +42,7 @@ export default function AILogosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [previewLogo, setPreviewLogo] = useState<AILogo | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -173,12 +180,12 @@ export default function AILogosPage() {
           </div>
           <div className="flex gap-3">
             <Button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/dashboard")}
               variant="outline"
               className="border-primary/30"
             >
-              <Home className="mr-2 h-5 w-5" />
-              Back to Home
+              <LayoutDashboard className="mr-2 h-5 w-5" />
+              Back to Dashboard
             </Button>
             <Button
               onClick={() => setShowForm(!showForm)}
@@ -352,10 +359,20 @@ export default function AILogosPage() {
 
                 <div className="flex gap-2">
                   {logo.status === "completed" && (
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Download className="mr-1 h-3 w-3" />
-                      Download
-                    </Button>
+                    <>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={() => setPreviewLogo(logo)}
+                      >
+                        <Eye className="mr-1 h-3 w-3" />
+                        Preview
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </>
                   )}
                   <Button
                     size="sm"
@@ -369,6 +386,55 @@ export default function AILogosPage() {
             ))}
           </div>
         )}
+
+        {/* Preview Dialog */}
+        <Dialog open={!!previewLogo} onOpenChange={() => setPreviewLogo(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-primary" />
+                {previewLogo?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {previewLogo && (
+              <div className="space-y-4">
+                <div className="aspect-square bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                  {previewLogo.imageUrl && (
+                    <img
+                      src={previewLogo.imageUrl}
+                      alt={previewLogo.name}
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Style</p>
+                    <p className="capitalize">{previewLogo.style}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Prompt</p>
+                    <p className="text-sm">{previewLogo.prompt}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Colors</p>
+                    <div className="flex gap-2">
+                      {previewLogo.colors.map((color, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <div
+                            className="w-8 h-8 rounded border border-border"
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className="text-xs">{color}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

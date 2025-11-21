@@ -8,7 +8,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Users, Loader2, Trash2, Eye, Sparkles } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Users, Loader2, Trash2, Eye, Sparkles, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 
 interface AICharacter {
@@ -30,6 +36,7 @@ export default function AICharactersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [previewCharacter, setPreviewCharacter] = useState<AICharacter | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -174,13 +181,23 @@ export default function AICharactersPage() {
               Create unique AI characters with personality and backstory
             </p>
           </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-primary hover:bg-primary/90 gold-glow"
-          >
-            <Sparkles className="mr-2 h-5 w-5" />
-            Create Character
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => router.push("/dashboard")}
+              variant="outline"
+              className="border-primary/30"
+            >
+              <LayoutDashboard className="mr-2 h-5 w-5" />
+              Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-primary hover:bg-primary/90 gold-glow"
+            >
+              <Sparkles className="mr-2 h-5 w-5" />
+              Create Character
+            </Button>
+          </div>
         </div>
 
         {showForm && (
@@ -357,10 +374,10 @@ export default function AICharactersPage() {
                     size="sm"
                     variant="outline"
                     className="flex-1"
-                    onClick={() => router.push(`/ai/characters/${character.id}`)}
+                    onClick={() => setPreviewCharacter(character)}
                   >
                     <Eye className="mr-1 h-3 w-3" />
-                    View
+                    Preview
                   </Button>
                   <Button
                     size="sm"
@@ -374,6 +391,60 @@ export default function AICharactersPage() {
             ))}
           </div>
         )}
+
+        {/* Preview Dialog */}
+        <Dialog open={!!previewCharacter} onOpenChange={() => setPreviewCharacter(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                {previewCharacter?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {previewCharacter && (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Voice Style</p>
+                  <p>{previewCharacter.voiceStyle}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Personality</p>
+                  <p>{previewCharacter.personality}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Backstory</p>
+                  <p className="text-sm">{previewCharacter.backstory}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Character Traits</p>
+                  <div className="flex flex-wrap gap-2">
+                    {previewCharacter.traits.map((trait, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
+                      >
+                        {trait}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Use Cases</p>
+                  <div className="flex flex-wrap gap-2">
+                    {previewCharacter.useCases.map((useCase, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full"
+                      >
+                        {useCase}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

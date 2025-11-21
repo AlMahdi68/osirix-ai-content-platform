@@ -26,6 +26,11 @@ import {
   LogOut,
   Loader2,
   Shield,
+  Package,
+  Palette,
+  TrendingUp,
+  Bot,
+  Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 import PlanBadge from "@/components/PlanBadge";
@@ -37,6 +42,14 @@ const navigation = [
   { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
   { name: "Social Media", href: "/social", icon: Calendar },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
+];
+
+const aiNavigation = [
+  { name: "AI Manager", href: "/ai/manager", icon: Bot },
+  { name: "Product Creator", href: "/ai/products", icon: Package },
+  { name: "Logo Generator", href: "/ai/logos", icon: Palette },
+  { name: "Character Creator", href: "/ai/characters", icon: Users },
+  { name: "Digital Marketer", href: "/ai/campaigns", icon: TrendingUp },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -88,7 +101,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-primary/20 bg-card/50 backdrop-blur">
+      <aside className="w-64 border-r border-primary/20 bg-card/50 backdrop-blur overflow-y-auto">
         <div className="flex h-16 items-center gap-2 border-b border-primary/20 px-6">
           <div className="p-2 rounded-lg bg-primary/10">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -112,16 +125,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             );
           })}
           
+          {/* AI Tools Section */}
+          <div className="pt-4">
+            <div className="px-3 pb-2 flex items-center gap-2">
+              <Wand2 className="h-4 w-4 text-primary" />
+              <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+                AI Tools
+              </span>
+            </div>
+            {aiNavigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link key={item.name} href={item.href}>
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={`w-full justify-start gap-2 ${isActive ? 'bg-primary/10 text-primary border border-primary/30' : 'hover:bg-primary/5 hover:text-primary'}`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                  </Button>
+                </Link>
+              );
+            })}
+          </div>
+          
           {isAdmin && (
-            <Link href="/admin">
-              <Button
-                variant={pathname === "/admin" ? "secondary" : "ghost"}
-                className={`w-full justify-start gap-2 ${pathname === "/admin" ? 'bg-primary/10 text-primary border border-primary/30' : 'hover:bg-primary/5 hover:text-primary'}`}
-              >
-                <Shield className="h-4 w-4" />
-                Admin Panel
-              </Button>
-            </Link>
+            <div className="pt-4">
+              <Link href="/admin">
+                <Button
+                  variant={pathname === "/admin" ? "secondary" : "ghost"}
+                  className={`w-full justify-start gap-2 ${pathname === "/admin" ? 'bg-primary/10 text-primary border border-primary/30' : 'hover:bg-primary/5 hover:text-primary'}`}
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin Panel
+                </Button>
+              </Link>
+            </div>
           )}
         </nav>
       </aside>
@@ -131,7 +170,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Header */}
         <header className="flex h-16 items-center justify-between border-b border-primary/20 px-6 bg-card/30 backdrop-blur">
           <h1 className="text-xl font-semibold">
-            {navigation.find((item) => item.href === pathname)?.name || "Dashboard"}
+            {[...navigation, ...aiNavigation].find((item) => item.href === pathname)?.name || "Dashboard"}
           </h1>
 
           <div className="flex items-center gap-3">

@@ -14,7 +14,12 @@ import {
   ArrowRight,
   Crown,
   Star,
-  Wand2
+  Wand2,
+  Package,
+  Palette,
+  Users,
+  TrendingUp,
+  Bot
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -116,8 +121,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 blur-3xl -z-10 animate-pulse" />
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-in fade-in duration-1000" style={{ animationDelay: "300ms" }}>
-            Transform text into professional videos with AI avatars, voice synthesis, and perfect lip-sync. 
-            Publish everywhere, monetize instantly.
+            Autonomous AI agents that create products, design logos, generate characters, and manage your entire social media presence to make money while you sleep.
           </p>
         </div>
 
@@ -151,6 +155,62 @@ export default function Home() {
         </div>
       </section>
 
+      {/* AI Tools Section */}
+      <section className="container py-24 bg-gradient-to-b from-transparent to-primary/5">
+        <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h2 className="text-4xl font-bold mb-4">
+            <span className="text-primary animated-gradient">Autonomous AI Tools</span> That Work For You
+          </h2>
+          <p className="text-xl text-muted-foreground">
+            Let AI agents handle your entire content creation and marketing workflow
+          </p>
+        </div>
+        
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <FeatureCard
+            icon={<Bot className="h-8 w-8 text-primary" />}
+            title="AI Manager Agent"
+            description="Autonomous AI agent that orchestrates all your tools, manages campaigns, and makes money for you 24/7."
+            delay="100ms"
+          />
+          
+          <FeatureCard
+            icon={<Package className="h-8 w-8 text-primary" />}
+            title="AI Product Creator"
+            description="Generate complete product ideas with descriptions, pricing, marketing copy, and go-to-market strategies."
+            delay="200ms"
+          />
+          
+          <FeatureCard
+            icon={<Palette className="h-8 w-8 text-primary" />}
+            title="AI Logo Generator"
+            description="Create professional logos instantly with custom styles, colors, and designs powered by AI."
+            delay="300ms"
+          />
+          
+          <FeatureCard
+            icon={<Users className="h-8 w-8 text-primary" />}
+            title="AI Character Creator"
+            description="Design unique AI characters with personalities, backstories, and voices for your content."
+            delay="400ms"
+          />
+          
+          <FeatureCard
+            icon={<TrendingUp className="h-8 w-8 text-primary" />}
+            title="AI Digital Marketer"
+            description="Plan and execute complete marketing campaigns across all social platforms with AI-generated content."
+            delay="500ms"
+          />
+          
+          <FeatureCard
+            icon={<Video className="h-8 w-8 text-primary" />}
+            title="AI Video Generation"
+            description="Create professional videos with Wav2Lip lip-sync technology and custom avatars. Perfect synchronization."
+            delay="600ms"
+          />
+        </div>
+      </section>
+
       {/* Features Grid */}
       <section className="container py-24">
         <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -164,44 +224,44 @@ export default function Home() {
         
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <FeatureCard
-            icon={<Video className="h-8 w-8 text-primary" />}
-            title="AI Video Generation"
-            description="Create professional videos with Wav2Lip lip-sync technology and custom avatars. Perfect synchronization every time."
-            delay="100ms"
-          />
-          
-          <FeatureCard
             icon={<Mic className="h-8 w-8 text-primary" />}
             title="Text-to-Speech"
             description="Generate natural-sounding voiceovers with ElevenLabs integration. Multiple voices and languages supported."
-            delay="200ms"
+            delay="100ms"
           />
           
           <FeatureCard
             icon={<ShoppingBag className="h-8 w-8 text-primary" />}
             title="Digital Marketplace"
             description="Sell your content, avatars, and voice packs to a global audience. Monetize your creativity instantly."
-            delay="300ms"
+            delay="200ms"
           />
           
           <FeatureCard
             icon={<Calendar className="h-8 w-8 text-primary" />}
             title="Social Publishing"
             description="Schedule and auto-publish to Twitter, Facebook, Instagram, and LinkedIn. Maximize your reach effortlessly."
-            delay="400ms"
+            delay="300ms"
           />
           
           <FeatureCard
             icon={<BarChart3 className="h-8 w-8 text-primary" />}
             title="Analytics Dashboard"
             description="Track performance, revenue, and engagement across all platforms. Data-driven content strategy."
-            delay="500ms"
+            delay="400ms"
           />
           
           <FeatureCard
             icon={<Zap className="h-8 w-8 text-primary" />}
             title="Job Queue System"
             description="Efficient background processing with real-time progress tracking. Never wait for content generation."
+            delay="500ms"
+          />
+          
+          <FeatureCard
+            icon={<Sparkles className="h-8 w-8 text-primary" />}
+            title="Autonomous Operations"
+            description="AI agents work independently to create, schedule, and publish content across all your channels."
             delay="600ms"
           />
         </div>

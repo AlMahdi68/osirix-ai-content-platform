@@ -193,3 +193,80 @@ export const verification = sqliteTable("verification", {
     () => new Date(),
   ),
 });
+
+// Add AI-powered feature tables
+
+// AI Products table
+export const aiProducts = sqliteTable('ai_products', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  name: text('name').notNull(),
+  description: text('description').notNull(),
+  category: text('category').notNull(),
+  priceSuggestion: integer('price_suggestion').notNull(),
+  targetAudience: text('target_audience').notNull(),
+  keyFeatures: text('key_features', { mode: 'json' }).notNull(),
+  marketingCopy: text('marketing_copy').notNull(),
+  status: text('status').notNull().default('draft'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// AI Logos table
+export const aiLogos = sqliteTable('ai_logos', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  name: text('name').notNull(),
+  prompt: text('prompt').notNull(),
+  imageUrl: text('image_url'),
+  style: text('style').notNull(),
+  colors: text('colors', { mode: 'json' }).notNull(),
+  status: text('status').notNull().default('generating'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// AI Characters table
+export const aiCharacters = sqliteTable('ai_characters', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  name: text('name').notNull(),
+  personality: text('personality').notNull(),
+  backstory: text('backstory').notNull(),
+  voiceStyle: text('voice_style').notNull(),
+  avatarId: integer('avatar_id').references(() => avatars.id),
+  traits: text('traits', { mode: 'json' }).notNull(),
+  useCases: text('use_cases', { mode: 'json' }).notNull(),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// AI Campaigns table
+export const aiCampaigns = sqliteTable('ai_campaigns', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  name: text('name').notNull(),
+  goal: text('goal').notNull(),
+  targetAudience: text('target_audience').notNull(),
+  platforms: text('platforms', { mode: 'json' }).notNull(),
+  contentStrategy: text('content_strategy').notNull(),
+  postingSchedule: text('posting_schedule', { mode: 'json' }).notNull(),
+  budget: integer('budget').notNull(),
+  status: text('status').notNull().default('planning'),
+  performanceMetrics: text('performance_metrics', { mode: 'json' }),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// AI Agent Activities table
+export const aiAgentActivities = sqliteTable('ai_agent_activities', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  activityType: text('activity_type').notNull(),
+  description: text('description').notNull(),
+  relatedResourceType: text('related_resource_type'),
+  relatedResourceId: integer('related_resource_id'),
+  result: text('result').notNull(),
+  metadata: text('metadata', { mode: 'json' }),
+  createdAt: text('created_at').notNull(),
+});

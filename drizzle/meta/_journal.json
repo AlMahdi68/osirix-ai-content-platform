@@ -15,6 +15,13 @@
       "when": 1763590799461,
       "tag": "0001_dear_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1763728835641,
+      "tag": "0002_magenta_franklin_richards",
+      "breakpoints": true
     }
   ]
 }

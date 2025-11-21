@@ -26,12 +26,7 @@ export async function GET(request: NextRequest) {
     const resultFilter = searchParams.get('result');
     const activityTypeFilter = searchParams.get('activityType');
 
-    // Build query with user filter
-    let query = db.select()
-      .from(aiAgentActivities)
-      .where(eq(aiAgentActivities.userId, session.user.id));
-
-    // Apply additional filters
+    // Build conditions array
     const conditions = [eq(aiAgentActivities.userId, session.user.id)];
 
     if (resultFilter) {
@@ -42,13 +37,11 @@ export async function GET(request: NextRequest) {
       conditions.push(eq(aiAgentActivities.activityType, activityTypeFilter));
     }
 
-    // Combine all conditions
-    const whereCondition = conditions.length > 1 ? and(...conditions) : conditions[0];
-
-    // Execute query with filters, ordering, and pagination
-    const activities = await db.select()
+    // Execute query with proper where clause
+    const activities = await db
+      .select()
       .from(aiAgentActivities)
-      .where(whereCondition)
+      .where(conditions.length === 1 ? conditions[0] : and(...conditions))
       .orderBy(desc(aiAgentActivities.createdAt))
       .limit(limit)
       .offset(offset);

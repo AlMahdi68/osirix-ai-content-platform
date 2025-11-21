@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Wand2, Loader2, Palette, Trash2, Download } from "lucide-react";
+import { Wand2, Loader2, Palette, Trash2, Download, Home } from "lucide-react";
 import { toast } from "sonner";
 
 interface AILogo {
@@ -171,13 +171,23 @@ export default function AILogosPage() {
               Create stunning logos with AI-powered design
             </p>
           </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-primary hover:bg-primary/90 gold-glow"
-          >
-            <Wand2 className="mr-2 h-5 w-5" />
-            Generate Logo
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => router.push("/")}
+              variant="outline"
+              className="border-primary/30"
+            >
+              <Home className="mr-2 h-5 w-5" />
+              Back to Home
+            </Button>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-primary hover:bg-primary/90 gold-glow"
+            >
+              <Wand2 className="mr-2 h-5 w-5" />
+              Generate Logo
+            </Button>
+          </div>
         </div>
 
         {showForm && (

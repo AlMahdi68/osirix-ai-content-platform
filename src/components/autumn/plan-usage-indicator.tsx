@@ -27,7 +27,9 @@ export default function PlanUsageIndicator() {
   }
 
   const planName = customer?.products?.at(-1)?.name || "Free";
-  const features = Object.values(customer?.features || {});
+  const features = Object.values(customer?.features || {}).filter(
+    (feature: any) => feature && feature.feature_id
+  );
 
   return (
     <Card>
@@ -48,12 +50,13 @@ export default function PlanUsageIndicator() {
             const percentage = hasLimit ? Math.min(100, (usage / limit) * 100) : 0;
             const isNearLimit = percentage > 75;
             const isAtLimit = percentage >= 90;
+            const featureName = feature.feature_id?.replace(/_/g, ' ') || 'Unknown Feature';
 
             return (
-              <div key={feature.feature_id} className="space-y-2">
+              <div key={feature.feature_id || Math.random()} className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground capitalize">
-                    {feature.feature_id.replace(/_/g, ' ')}
+                    {featureName}
                   </span>
                   <span className="font-mono text-xs font-medium">
                     {usage}

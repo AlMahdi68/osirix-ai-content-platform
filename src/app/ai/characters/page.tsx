@@ -71,7 +71,13 @@ export default function AICharactersPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setCharacters(data.characters || []);
+        // Parse traits and useCases if they come as JSON strings
+        const parsedCharacters = (data.characters || []).map((char: any) => ({
+          ...char,
+          traits: typeof char.traits === 'string' ? JSON.parse(char.traits) : (Array.isArray(char.traits) ? char.traits : []),
+          useCases: typeof char.useCases === 'string' ? JSON.parse(char.useCases) : (Array.isArray(char.useCases) ? char.useCases : []),
+        }));
+        setCharacters(parsedCharacters);
       }
     } catch (error) {
       console.error("Error fetching characters:", error);
@@ -329,66 +335,71 @@ export default function AICharactersPage() {
           </Card>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {characters.map((character) => (
-              <Card
-                key={character.id}
-                className="p-6 hover:border-primary/50 transition-all duration-300 group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-1 group-hover:text-primary transition-colors">
-                      {character.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {character.voiceStyle}
-                    </p>
+            {characters.map((character) => {
+              // Ensure traits is always an array
+              const traitsArray = Array.isArray(character.traits) ? character.traits : [];
+              
+              return (
+                <Card
+                  key={character.id}
+                  className="p-6 hover:border-primary/50 transition-all duration-300 group"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-1 group-hover:text-primary transition-colors">
+                        {character.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {character.voiceStyle}
+                      </p>
+                    </div>
+                    <Users className="h-8 w-8 text-primary/50" />
                   </div>
-                  <Users className="h-8 w-8 text-primary/50" />
-                </div>
 
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {character.personality}
-                </p>
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {character.personality}
+                  </p>
 
-                <div className="mb-4">
-                  <p className="text-xs font-medium mb-2">Traits:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {character.traits.slice(0, 3).map((trait, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 bg-primary/10 text-primary text-xs rounded"
-                      >
-                        {trait}
-                      </span>
-                    ))}
-                    {character.traits.length > 3 && (
-                      <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded">
-                        +{character.traits.length - 3}
-                      </span>
-                    )}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium mb-2">Traits:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {traitsArray.slice(0, 3).map((trait, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-primary/10 text-primary text-xs rounded"
+                        >
+                          {trait}
+                        </span>
+                      ))}
+                      {traitsArray.length > 3 && (
+                        <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded">
+                          +{traitsArray.length - 3}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setPreviewCharacter(character)}
-                  >
-                    <Eye className="mr-1 h-3 w-3" />
-                    Preview
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDelete(character.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setPreviewCharacter(character)}
+                    >
+                      <Eye className="mr-1 h-3 w-3" />
+                      Preview
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDelete(character.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         )}
 
@@ -418,7 +429,7 @@ export default function AICharactersPage() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-2">Character Traits</p>
                   <div className="flex flex-wrap gap-2">
-                    {previewCharacter.traits.map((trait, idx) => (
+                    {(Array.isArray(previewCharacter.traits) ? previewCharacter.traits : []).map((trait, idx) => (
                       <span
                         key={idx}
                         className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
@@ -431,7 +442,7 @@ export default function AICharactersPage() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-2">Use Cases</p>
                   <div className="flex flex-wrap gap-2">
-                    {previewCharacter.useCases.map((useCase, idx) => (
+                    {(Array.isArray(previewCharacter.useCases) ? previewCharacter.useCases : []).map((useCase, idx) => (
                       <span
                         key={idx}
                         className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full"

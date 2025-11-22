@@ -31,12 +31,14 @@ import {
   TrendingUp,
   Bot,
   Wand2,
+  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 import PlanBadge from "@/components/PlanBadge";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "OZ Guide", href: "/oz", icon: Crown },
   { name: "Avatars", href: "/avatars", icon: Users },
   { name: "Jobs", href: "/jobs", icon: Briefcase },
   { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },

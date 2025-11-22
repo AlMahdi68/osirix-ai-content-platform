@@ -62,6 +62,12 @@ export default function Home() {
             </span>
           </div>
           <nav className="flex items-center gap-4">
+            <Link href="/oz">
+              <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition hover:scale-105 gap-2">
+                <Wand2 className="h-4 w-4" />
+                Meet OZ
+              </Button>
+            </Link>
             <Link href="/plans">
               <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition hover:scale-105">
                 Pricing
@@ -132,9 +138,10 @@ export default function Home() {
               <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />
             </Button>
           </Link>
-          <Link href="/plans">
+          <Link href="/oz">
             <Button size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 border-primary/30 hover:bg-primary/5 smooth-transition hover:scale-110 hover:-translate-y-1">
-              View Pricing
+              <Wand2 className="h-5 w-5" />
+              Learn from OZ
             </Button>
           </Link>
         </div>

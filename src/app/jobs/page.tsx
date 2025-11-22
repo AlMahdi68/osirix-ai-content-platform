@@ -12,8 +12,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Video, Mic, FileVideo, CheckCircle, Clock, XCircle, Loader2 } from "lucide-react";
+import { Plus, Video, Mic, FileVideo, CheckCircle, Clock, XCircle, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface Job {
   id: number;
@@ -202,47 +203,45 @@ export default function JobsPage() {
         ) : jobs.length > 0 ? (
           <div className="space-y-4">
             {jobs.map((job) => (
-              <Card key={job.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="mt-1">{getTypeIcon(job.type)}</div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold capitalize">{job.type} Generation</h3>
-                          <Badge variant={job.status === "completed" ? "default" : job.status === "failed" ? "destructive" : "secondary"}>
-                            {job.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Created: {new Date(job.createdAt).toLocaleString()}
-                        </p>
-                        {job.status === "processing" && (
-                          <div className="space-y-2">
-                            <Progress value={job.progress} className="h-2" />
-                            <p className="text-xs text-muted-foreground">{job.progress}% complete</p>
+              <Link key={job.id} href={`/jobs/${job.id}`}>
+                <Card className="hover:border-primary/50 transition-all cursor-pointer group">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="mt-1">{getTypeIcon(job.type)}</div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold capitalize group-hover:text-primary transition-colors">{job.type} Generation</h3>
+                            <Badge variant={job.status === "completed" ? "default" : job.status === "failed" ? "destructive" : "secondary"}>
+                              {job.status}
+                            </Badge>
                           </div>
-                        )}
-                        {job.status === "failed" && job.errorMessage && (
-                          <p className="text-sm text-red-500 mt-2">{job.errorMessage}</p>
-                        )}
-                        {job.status === "completed" && (
-                          <Button variant="outline" size="sm" className="mt-2">
-                            Download Result
-                          </Button>
-                        )}
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Created: {new Date(job.createdAt).toLocaleString()}
+                          </p>
+                          {job.status === "processing" && (
+                            <div className="space-y-2">
+                              <Progress value={job.progress} className="h-2" />
+                              <p className="text-xs text-muted-foreground">{job.progress}% complete</p>
+                            </div>
+                          )}
+                          {job.status === "failed" && job.errorMessage && (
+                            <p className="text-sm text-red-500 mt-2 line-clamp-1">{job.errorMessage}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {getStatusIcon(job.status)}
+                        <div className="text-right">
+                          <p className="text-sm font-medium">{job.creditsReserved} credits</p>
+                          <p className="text-xs text-muted-foreground">reserved</p>
+                        </div>
+                        <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(job.status)}
-                      <div className="text-right">
-                        <p className="text-sm font-medium">{job.creditsReserved} credits</p>
-                        <p className="text-xs text-muted-foreground">reserved</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         ) : (

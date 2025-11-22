@@ -344,24 +344,73 @@ export default function OZGuidePage() {
                   </div>
                 </div>
 
+                <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-green-500">
+                      <DollarSign className="h-5 w-5" />
+                      How Social Media Makes You Money
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Ad Revenue & Monetization</p>
+                          <p className="text-sm text-muted-foreground">YouTube videos earn $3-10 per 1000 views. Post 10 videos/week = $500-3000/month passive income</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Affiliate Marketing</p>
+                          <p className="text-sm text-muted-foreground">Include affiliate links in posts. 2% conversion on 10K followers = $200-500/month per product</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Brand Partnerships</p>
+                          <p className="text-sm text-muted-foreground">Brands pay $100-1000 per sponsored post depending on engagement. 4 posts/month = $400-4000</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Product Promotion</p>
+                          <p className="text-sm text-muted-foreground">Drive traffic to your marketplace products. 1% conversion on 5K visitors = 50 sales/month</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Lead Generation</p>
+                          <p className="text-sm text-muted-foreground">B2B leads via LinkedIn worth $50-200 each. 10 qualified leads/month = $500-2000</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <SocialPlatformGuide
                   icon={<Youtube className="h-8 w-8" />}
                   platform="YouTube"
                   color="from-red-500/20 to-rose-500/20 border-red-500/30"
                   steps={[
-                    "Go to Settings → Social Media",
-                    "Click 'Connect YouTube'",
+                    "Navigate to Settings → Social Media in Osirix",
+                    "Click 'Connect YouTube' button",
                     "Sign in with your Google account",
-                    "Grant permissions to post videos",
+                    "Grant permissions: Upload videos, Manage channel",
                     "Osirix will auto-upload videos with titles, descriptions, and tags"
                   ]}
                   benefits={[
-                    "Auto-upload lip-sync videos",
-                    "Optimized titles and descriptions",
-                    "Schedule posts for peak times",
-                    "Track views and earnings"
+                    "Auto-upload lip-sync videos with optimized metadata",
+                    "Schedule uploads for peak viewing times",
+                    "Auto-generate SEO-friendly titles and descriptions",
+                    "Track views, watch time, and revenue"
                   ]}
                   moneyPotential="$100-10K+/month from ads"
+                  howToEarn="Enable monetization in YouTube Studio. Post 3-5 videos weekly. Target 100K+ views/month for $300-1000 ad revenue. Add affiliate links in descriptions for extra income."
                 />
 
                 <SocialPlatformGuide
@@ -369,19 +418,20 @@ export default function OZGuidePage() {
                   platform="Instagram"
                   color="from-pink-500/20 to-purple-500/20 border-pink-500/30"
                   steps={[
-                    "Go to Settings → Social Media",
-                    "Click 'Connect Instagram'",
-                    "Log in with Instagram credentials",
+                    "Go to Settings → Social Media in Osirix",
+                    "Click 'Connect Instagram' button",
+                    "Log in with Instagram credentials (Business account required)",
                     "Authorize Osirix to post on your behalf",
                     "AI will create Reels, Stories, and Posts automatically"
                   ]}
                   benefits={[
-                    "Auto-post Reels and Stories",
-                    "Hashtag optimization",
-                    "Engagement analytics",
-                    "Best time posting"
+                    "Auto-post Reels and Stories with trending audio",
+                    "Hashtag optimization for maximum reach",
+                    "Best time posting based on audience analytics",
+                    "Engagement tracking and growth metrics"
                   ]}
                   moneyPotential="$500-5K/month from brand deals"
+                  howToEarn="Reach 10K+ followers for swipe-up links. Partner with brands for sponsored posts ($100-1000 each). Promote affiliate products in bio link. Use Instagram Shopping for direct sales."
                 />
 
                 <SocialPlatformGuide
@@ -390,18 +440,19 @@ export default function OZGuidePage() {
                   color="from-blue-500/20 to-cyan-500/20 border-blue-500/30"
                   steps={[
                     "Go to Settings → Social Media",
-                    "Click 'Connect Twitter'",
+                    "Click 'Connect Twitter' button",
                     "Sign in to your X account",
-                    "Authorize API access",
+                    "Authorize API access for posting",
                     "Osirix will tweet content automatically with optimal timing"
                   ]}
                   benefits={[
-                    "Auto-tweet campaigns",
-                    "Thread generation",
-                    "Engagement tracking",
-                    "Viral content analysis"
+                    "Auto-tweet campaigns with trending hashtags",
+                    "Thread generation for complex topics",
+                    "Engagement tracking and reply management",
+                    "Viral content analysis and optimization"
                   ]}
                   moneyPotential="$200-3K/month from engagement"
+                  howToEarn="Join Twitter Blue for monetization. Earn from impressions ($0.005/1000 views). Promote affiliate products in tweets. Build audience for newsletter signups. Offer paid consulting."
                 />
 
                 <SocialPlatformGuide
@@ -410,18 +461,20 @@ export default function OZGuidePage() {
                   color="from-blue-600/20 to-indigo-500/20 border-blue-600/30"
                   steps={[
                     "Go to Settings → Social Media",
-                    "Click 'Connect Facebook'",
+                    "Click 'Connect Facebook' button",
                     "Log in to Facebook",
                     "Grant page management permissions",
+                    "Select which page Osirix should manage",
                     "AI posts to your page automatically"
                   ]}
                   benefits={[
                     "Auto-post to pages and groups",
-                    "Audience targeting",
-                    "Engagement metrics",
-                    "Ad campaign automation"
+                    "Audience targeting for better reach",
+                    "Engagement metrics and insights",
+                    "Ad campaign automation integration"
                   ]}
                   moneyPotential="$300-4K/month from page monetization"
+                  howToEarn="Enable in-stream ads on videos. Join Facebook Ad Breaks for revenue share. Sell products via Facebook Shop. Run targeted ads to your marketplace. Build community for paid membership."
                 />
 
                 <SocialPlatformGuide
@@ -430,18 +483,19 @@ export default function OZGuidePage() {
                   color="from-blue-700/20 to-blue-500/20 border-blue-700/30"
                   steps={[
                     "Go to Settings → Social Media",
-                    "Click 'Connect LinkedIn'",
+                    "Click 'Connect LinkedIn' button",
                     "Sign in with LinkedIn",
-                    "Authorize access to post",
+                    "Authorize access to post on your behalf",
                     "AI creates professional content automatically"
                   ]}
                   benefits={[
-                    "Professional content creation",
+                    "Professional content creation for B2B audience",
                     "Network growth automation",
-                    "B2B lead generation",
-                    "Thought leadership posts"
+                    "Lead generation and nurturing",
+                    "Thought leadership positioning"
                   ]}
                   moneyPotential="$500-10K/month from B2B leads"
+                  howToEarn="Generate consulting leads ($1000-10K/project). Offer B2B services to connections. Partner with companies for sponsored content. Build email list for course sales. Recruit for affiliate programs."
                 />
               </CardContent>
             </Card>
@@ -456,12 +510,13 @@ export default function OZGuidePage() {
               <CardContent>
                 <ol className="space-y-4">
                   {[
-                    "Navigate to Settings → Social Media section",
-                    "Click 'Connect All' to link all platforms at once",
-                    "Follow the authentication prompts for each platform",
-                    "Set your posting preferences (frequency, timing)",
-                    "Enable AI Manager Agent for full automation",
-                    "Watch your content spread across the internet! 🚀"
+                    "Navigate to Settings → Social Media OR click the Social Media tab in dashboard",
+                    "Click 'Connected Accounts' tab to view all platforms",
+                    "Click 'Connect' button for each platform you want to use",
+                    "Follow the OAuth prompts for each platform (sign in and authorize)",
+                    "Return to Osirix - you'll see 'Connected' status with green checkmark",
+                    "Go to 'Posts & Schedule' tab and create your first post!",
+                    "Enable AI Manager Agent for full automation across all platforms 🚀"
                   ].map((step, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold flex-shrink-0">
@@ -471,6 +526,62 @@ export default function OZGuidePage() {
                     </li>
                   ))}
                 </ol>
+                <div className="mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                  <p className="text-sm font-medium text-green-500 mb-2">💡 Pro Tip: Start with 2-3 platforms</p>
+                  <p className="text-sm text-muted-foreground">
+                    Connect YouTube + Instagram first for maximum reach and monetization potential. 
+                    Add LinkedIn if you're targeting B2B. Add Twitter for viral potential.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="h-5 w-5 text-purple-500" />
+                  What Happens After Connecting?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 font-bold flex-shrink-0">
+                      1
+                    </div>
+                    <div>
+                      <p className="font-medium">Immediate Access to Posting</p>
+                      <p className="text-sm text-muted-foreground">Schedule posts manually or use AI to generate content automatically</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 font-bold flex-shrink-0">
+                      2
+                    </div>
+                    <div>
+                      <p className="font-medium">AI Manager Takes Over</p>
+                      <p className="text-sm text-muted-foreground">Enable AI Manager in dashboard - it creates, schedules, and publishes content 24/7</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 font-bold flex-shrink-0">
+                      3
+                    </div>
+                    <div>
+                      <p className="font-medium">Analytics & Optimization</p>
+                      <p className="text-sm text-muted-foreground">Track impressions, engagement, clicks - AI adjusts strategy for maximum growth</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 font-bold flex-shrink-0">
+                      4
+                    </div>
+                    <div>
+                      <p className="font-medium">Money Starts Flowing</p>
+                      <p className="text-sm text-muted-foreground">Within 2-4 weeks: Ad revenue, affiliate sales, brand partnerships, product sales</p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -951,7 +1062,7 @@ function MoneyStrategyCard({ number, title, description, steps, potential, diffi
   );
 }
 
-function SocialPlatformGuide({ icon, platform, color, steps, benefits, moneyPotential }: any) {
+function SocialPlatformGuide({ icon, platform, color, steps, benefits, moneyPotential, howToEarn }: any) {
   return (
     <Card className={`bg-gradient-to-br ${color}`}>
       <CardHeader>
@@ -993,7 +1104,13 @@ function SocialPlatformGuide({ icon, platform, color, steps, benefits, moneyPote
         </div>
         <div className="pt-4 border-t border-border/50">
           <p className="text-sm text-muted-foreground mb-1">Money Potential:</p>
-          <p className="font-bold text-lg text-green-500">{moneyPotential}</p>
+          <p className="font-bold text-lg text-green-500 mb-3">{moneyPotential}</p>
+          {howToEarn && (
+            <>
+              <p className="text-sm text-muted-foreground mb-1">How to Earn:</p>
+              <p className="text-sm">{howToEarn}</p>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>

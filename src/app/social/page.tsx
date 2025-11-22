@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,12 +12,23 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Calendar, Send, Twitter, Facebook, Instagram, Linkedin, Clock, CheckCircle, XCircle, Edit2, Trash2, MoreVertical, Lock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Calendar, Send, Twitter, Facebook, Instagram, Linkedin, Clock, CheckCircle, XCircle, Edit2, Trash2, MoreVertical, Lock, Link as LinkIcon, Youtube, Unlink, RefreshCw, TrendingUp, Eye, Heart, MousePointerClick } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useCustomer } from "autumn-js/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
+interface SocialAccount {
+  id: number;
+  platform: string;
+  platformUsername: string;
+  isConnected: boolean;
+  tokenExpiresAt: string | null;
+  lastRefreshedAt: string | null;
+  metadata: any;
+}
 
 interface SocialPost {
   id: number;
@@ -26,24 +37,33 @@ interface SocialPost {
   scheduledAt: string | null;
   publishedAt: string | null;
   status: string;
+  impressions: number;
+  engagements: number;
+  clicks: number;
   errorMessage: string | null;
   createdAt: string;
 }
 
 export default function SocialPage() {
+  const [activeTab, setActiveTab] = useState("posts");
+  const [accounts, setAccounts] = useState<SocialAccount[]>([]);
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [accountsLoading, setAccountsLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<SocialPost | null>(null);
   const [deletePostId, setDeletePostId] = useState<number | null>(null);
+  const [disconnectAccountId, setDisconnectAccountId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const { check, isLoading: checkingAccess } = useCustomer();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     checkFeatureAccess();
+    fetchAccounts();
     fetchPosts();
   }, []);
 
@@ -54,6 +74,25 @@ export default function SocialPage() {
     } catch (error) {
       console.error("Failed to check access:", error);
       setHasAccess(false);
+    }
+  };
+
+  const fetchAccounts = async () => {
+    try {
+      setAccountsLoading(true);
+      const token = localStorage.getItem("bearer_token");
+      const response = await fetch("/api/social/accounts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAccounts(data.accounts || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch accounts:", error);
+    } finally {
+      setAccountsLoading(false);
     }
   };
 
@@ -76,6 +115,78 @@ export default function SocialPage() {
       toast.error("Failed to fetch posts");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleConnectPlatform = async (platform: string) => {
+    try {
+      const token = localStorage.getItem("bearer_token");
+      const redirectUrl = `${window.location.origin}/api/auth/callback/social`;
+      
+      const response = await fetch("/api/social/accounts/connect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ platform, redirectUrl }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        window.location.href = data.authUrl;
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to initiate connection");
+      }
+    } catch (error) {
+      toast.error("Failed to connect platform");
+    }
+  };
+
+  const handleDisconnectAccount = async () => {
+    if (!disconnectAccountId) return;
+
+    setDisconnecting(true);
+    try {
+      const token = localStorage.getItem("bearer_token");
+      const response = await fetch(`/api/social/accounts/${disconnectAccountId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        toast.success("Account disconnected successfully");
+        setDisconnectAccountId(null);
+        fetchAccounts();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to disconnect account");
+      }
+    } catch (error) {
+      toast.error("Failed to disconnect account");
+    } finally {
+      setDisconnecting(false);
+    }
+  };
+
+  const handleRefreshToken = async (accountId: number) => {
+    try {
+      const token = localStorage.getItem("bearer_token");
+      const response = await fetch(`/api/social/accounts/${accountId}/refresh`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        toast.success("Token refreshed successfully");
+        fetchAccounts();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to refresh token");
+      }
+    } catch (error) {
+      toast.error("Failed to refresh token");
     }
   };
 
@@ -187,16 +298,24 @@ export default function SocialPage() {
     }
   };
 
-  const handleScheduleClick = async () => {
-    if (checkingAccess || hasAccess === null) return;
-    
-    if (!hasAccess) {
-      toast.error("Social scheduling requires a paid plan");
-      router.push("/plans");
-      return;
+  const handlePublishNow = async (postId: number) => {
+    try {
+      const token = localStorage.getItem("bearer_token");
+      const response = await fetch(`/api/social/posts/${postId}/publish`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        toast.success("Post published successfully!");
+        fetchPosts();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to publish post");
+      }
+    } catch (error) {
+      toast.error("Failed to publish post");
     }
-    
-    setDialogOpen(true);
   };
 
   const openEditDialog = (post: SocialPost) => {
@@ -219,6 +338,8 @@ export default function SocialPage() {
         return <Instagram className="h-5 w-5" />;
       case "linkedin":
         return <Linkedin className="h-5 w-5" />;
+      case "youtube":
+        return <Youtube className="h-5 w-5" />;
       default:
         return <Send className="h-5 w-5" />;
     }
@@ -235,6 +356,10 @@ export default function SocialPage() {
       default:
         return <Clock className="h-5 w-5 text-gray-500" />;
     }
+  };
+
+  const isConnected = (platform: string) => {
+    return accounts.some(acc => acc.platform === platform && acc.isConnected);
   };
 
   if (checkingAccess || hasAccess === null) {
@@ -283,14 +408,14 @@ export default function SocialPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Social Media</h2>
-            <p className="text-muted-foreground">Schedule and publish content across platforms</p>
+            <p className="text-muted-foreground">Connect accounts and schedule posts automatically</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={(open) => {
             setDialogOpen(open);
             if (!open) setEditingPost(null);
           }}>
             <DialogTrigger asChild>
-              <Button className="gap-2" onClick={handleScheduleClick}>
+              <Button className="gap-2">
                 <Plus className="h-4 w-4" />
                 Schedule Post
               </Button>
@@ -311,12 +436,18 @@ export default function SocialPage() {
                         <SelectValue placeholder="Select platform" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="twitter">Twitter</SelectItem>
-                        <SelectItem value="facebook">Facebook</SelectItem>
-                        <SelectItem value="instagram">Instagram</SelectItem>
-                        <SelectItem value="linkedin">LinkedIn</SelectItem>
+                        {isConnected("twitter") && <SelectItem value="twitter">Twitter</SelectItem>}
+                        {isConnected("facebook") && <SelectItem value="facebook">Facebook</SelectItem>}
+                        {isConnected("instagram") && <SelectItem value="instagram">Instagram</SelectItem>}
+                        {isConnected("linkedin") && <SelectItem value="linkedin">LinkedIn</SelectItem>}
+                        {isConnected("youtube") && <SelectItem value="youtube">YouTube</SelectItem>}
                       </SelectContent>
                     </Select>
+                    {accounts.filter(a => a.isConnected).length === 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        No platforms connected. Go to Accounts tab to connect.
+                      </p>
+                    )}
                   </div>
                 )}
                 <div className="space-y-2">
@@ -346,7 +477,7 @@ export default function SocialPage() {
                     {creating ? "Saving..." : editingPost ? "Update Post" : "Schedule Post"}
                   </Button>
                   {editingPost && (
-                    <Button type="button" variant="outline" onClick={closeDialog} disabled={creating}>
+                    <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); setEditingPost(null); }} disabled={creating}>
                       Cancel
                     </Button>
                   )}
@@ -356,145 +487,289 @@ export default function SocialPage() {
           </Dialog>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Twitter</CardTitle>
-              <Twitter className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {posts.filter((p) => p.platform === "twitter").length}
-              </div>
-              <p className="text-xs text-muted-foreground">posts scheduled</p>
-            </CardContent>
-          </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="posts">Posts & Schedule</TabsTrigger>
+            <TabsTrigger value="accounts">Connected Accounts</TabsTrigger>
+          </TabsList>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Facebook</CardTitle>
-              <Facebook className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {posts.filter((p) => p.platform === "facebook").length}
-              </div>
-              <p className="text-xs text-muted-foreground">posts scheduled</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Instagram</CardTitle>
-              <Instagram className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {posts.filter((p) => p.platform === "instagram").length}
-              </div>
-              <p className="text-xs text-muted-foreground">posts scheduled</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">LinkedIn</CardTitle>
-              <Linkedin className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {posts.filter((p) => p.platform === "linkedin").length}
-              </div>
-              <p className="text-xs text-muted-foreground">posts scheduled</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <Skeleton className="h-20 w-full" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : posts.length > 0 ? (
-          <div className="space-y-4">
-            {posts.map((post) => (
-              <Card key={post.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="mt-1">{getPlatformIcon(post.platform)}</div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold capitalize">{post.platform}</h3>
-                          <Badge variant={post.status === "published" ? "default" : post.status === "failed" ? "destructive" : "secondary"}>
-                            {post.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {post.content}
-                        </p>
-                        {post.errorMessage && (
-                          <p className="text-xs text-red-500 mb-2">
-                            Error: {post.errorMessage}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          {post.scheduledAt
-                            ? `Scheduled for: ${new Date(post.scheduledAt).toLocaleString()}`
-                            : post.publishedAt
-                            ? `Published: ${new Date(post.publishedAt).toLocaleString()}`
-                            : `Created: ${new Date(post.createdAt).toLocaleString()}`}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(post.status)}
-                      {post.status !== "published" && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openEditDialog(post)}>
-                              <Edit2 className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => setDeletePostId(post.id)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </div>
+          {/* Posts Tab */}
+          <TabsContent value="posts" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Twitter</CardTitle>
+                  <Twitter className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {posts.filter((p) => p.platform === "twitter").length}
                   </div>
+                  <p className="text-xs text-muted-foreground">posts scheduled</p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        ) : (
-          <Card className="p-12 text-center">
-            <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No posts scheduled</h3>
-            <p className="text-muted-foreground mb-4">
-              Schedule your first social media post to get started
-            </p>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Schedule Post
-            </Button>
-          </Card>
-        )}
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Facebook</CardTitle>
+                  <Facebook className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {posts.filter((p) => p.platform === "facebook").length}
+                  </div>
+                  <p className="text-xs text-muted-foreground">posts scheduled</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Instagram</CardTitle>
+                  <Instagram className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {posts.filter((p) => p.platform === "instagram").length}
+                  </div>
+                  <p className="text-xs text-muted-foreground">posts scheduled</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">LinkedIn</CardTitle>
+                  <Linkedin className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {posts.filter((p) => p.platform === "linkedin").length}
+                  </div>
+                  <p className="text-xs text-muted-foreground">posts scheduled</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i}>
+                    <CardContent className="p-6">
+                      <Skeleton className="h-20 w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : posts.length > 0 ? (
+              <div className="space-y-4">
+                {posts.map((post) => (
+                  <Card key={post.id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="mt-1">{getPlatformIcon(post.platform)}</div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold capitalize">{post.platform}</h3>
+                              <Badge variant={post.status === "published" ? "default" : post.status === "failed" ? "destructive" : "secondary"}>
+                                {post.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {post.content}
+                            </p>
+                            {post.status === "published" && (
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                                <span className="flex items-center gap-1">
+                                  <Eye className="h-3 w-3" />
+                                  {post.impressions} views
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Heart className="h-3 w-3" />
+                                  {post.engagements} engagements
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MousePointerClick className="h-3 w-3" />
+                                  {post.clicks} clicks
+                                </span>
+                              </div>
+                            )}
+                            {post.errorMessage && (
+                              <p className="text-xs text-red-500 mb-2">
+                                Error: {post.errorMessage}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              {post.scheduledAt
+                                ? `Scheduled for: ${new Date(post.scheduledAt).toLocaleString()}`
+                                : post.publishedAt
+                                ? `Published: ${new Date(post.publishedAt).toLocaleString()}`
+                                : `Created: ${new Date(post.createdAt).toLocaleString()}`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(post.status)}
+                          {post.status !== "published" && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {(post.status === "draft" || post.status === "scheduled") && (
+                                  <DropdownMenuItem onClick={() => handlePublishNow(post.id)}>
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Publish Now
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={() => { setEditingPost(post); setDialogOpen(true); }}>
+                                  <Edit2 className="h-4 w-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => setDeletePostId(post.id)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-12 text-center">
+                <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No posts scheduled</h3>
+                <p className="text-muted-foreground mb-4">
+                  Schedule your first social media post to get started
+                </p>
+                <Button onClick={() => setDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Schedule Post
+                </Button>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Accounts Tab */}
+          <TabsContent value="accounts" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Connect Social Media Accounts</CardTitle>
+                <CardDescription>
+                  Link your social media accounts to enable automated posting
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {accountsLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} className="h-20 w-full" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {["twitter", "facebook", "instagram", "linkedin", "youtube"].map((platform) => {
+                      const account = accounts.find(a => a.platform === platform);
+                      const connected = account?.isConnected;
+
+                      return (
+                        <Card key={platform} className={connected ? "border-primary/30" : "border-dashed"}>
+                          <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="p-3 rounded-lg bg-primary/10">
+                                  {getPlatformIcon(platform)}
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold capitalize flex items-center gap-2">
+                                    {platform}
+                                    {connected && (
+                                      <Badge variant="outline" className="text-green-500 border-green-500">
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                        Connected
+                                      </Badge>
+                                    )}
+                                  </h4>
+                                  {connected && account ? (
+                                    <p className="text-sm text-muted-foreground">
+                                      @{account.platformUsername}
+                                      {account.tokenExpiresAt && new Date(account.tokenExpiresAt) < new Date() && (
+                                        <span className="text-yellow-500 ml-2">(Token expired)</span>
+                                      )}
+                                    </p>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                      Not connected
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {connected && account ? (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleRefreshToken(account.id)}
+                                    >
+                                      <RefreshCw className="h-4 w-4 mr-2" />
+                                      Refresh
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setDisconnectAccountId(account.id)}
+                                      className="text-red-600 hover:text-red-700"
+                                    >
+                                      <Unlink className="h-4 w-4 mr-2" />
+                                      Disconnect
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <Button onClick={() => handleConnectPlatform(platform)}>
+                                    <LinkIcon className="h-4 w-4 mr-2" />
+                                    Connect
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Need Help Connecting?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Visit the OZ Guide for step-by-step instructions on connecting each social media platform.
+                </p>
+                <Link href="/oz">
+                  <Button variant="outline">
+                    Visit OZ Guide
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <AlertDialog open={deletePostId !== null} onOpenChange={() => setDeletePostId(null)}>
@@ -509,6 +784,23 @@ export default function SocialPage() {
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeletePost} disabled={deleting} className="bg-red-600 hover:bg-red-700">
               {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={disconnectAccountId !== null} onOpenChange={() => setDisconnectAccountId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to disconnect this social media account? You'll need to reconnect it to post again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={disconnecting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDisconnectAccount} disabled={disconnecting} className="bg-red-600 hover:bg-red-700">
+              {disconnecting ? "Disconnecting..." : "Disconnect"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -100,10 +100,29 @@ export const orders = sqliteTable('orders', {
   updatedAt: text('updated_at').notNull(),
 });
 
+// Add social_accounts table
+export const socialAccounts = sqliteTable('social_accounts', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  platform: text('platform').notNull(),
+  platformUserId: text('platform_user_id').notNull(),
+  platformUsername: text('platform_username').notNull(),
+  accessToken: text('access_token').notNull(),
+  refreshToken: text('refresh_token'),
+  tokenExpiresAt: text('token_expires_at'),
+  scopes: text('scopes', { mode: 'json' }).notNull(),
+  isConnected: integer('is_connected', { mode: 'boolean' }).notNull().default(true),
+  lastRefreshedAt: text('last_refreshed_at'),
+  metadata: text('metadata', { mode: 'json' }),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
 // Add social_posts table
 export const socialPosts = sqliteTable('social_posts', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: text('user_id').notNull(),
+  platformAccountId: integer('platform_account_id').references(() => socialAccounts.id),
   platform: text('platform').notNull(),
   content: text('content').notNull(),
   mediaUrls: text('media_urls', { mode: 'json' }).notNull(),
@@ -111,6 +130,9 @@ export const socialPosts = sqliteTable('social_posts', {
   publishedAt: text('published_at'),
   status: text('status').notNull(),
   platformPostId: text('platform_post_id'),
+  impressions: integer('impressions').notNull().default(0),
+  engagements: integer('engagements').notNull().default(0),
+  clicks: integer('clicks').notNull().default(0),
   errorMessage: text('error_message'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

@@ -34,7 +34,8 @@ import {
   Facebook,
   Twitter,
   Linkedin,
-  Youtube
+  Youtube,
+  XCircle
 } from "lucide-react";
 import Link from "next/link";
 

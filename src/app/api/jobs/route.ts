@@ -11,7 +11,7 @@ import { rateLimiter } from "@/lib/rate-limiter";
 import { jobProcessor } from "@/lib/services/job-processor";
 import { logger } from "@/lib/logger";
 
-async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   
   if (!session?.user) {
@@ -50,7 +50,7 @@ async function GET(request: NextRequest) {
   };
 }
 
-async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   
   if (!session?.user) {
@@ -136,5 +136,5 @@ async function POST(request: NextRequest) {
   };
 }
 
-export const GET = withErrorHandler(GET);
-export const POST = withErrorHandler(POST);
+export const GET = withErrorHandler(handleGET);
+export const POST = withErrorHandler(handlePOST);

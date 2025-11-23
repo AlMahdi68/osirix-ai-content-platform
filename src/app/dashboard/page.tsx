@@ -15,7 +15,9 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  Sparkles,
+  Zap
 } from "lucide-react";
 import Link from "next/link";
 
@@ -36,7 +38,6 @@ export default function DashboardPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // Check if user has completed onboarding
     const onboardingCompleted = localStorage.getItem("onboarding_completed");
     if (!onboardingCompleted) {
       setShowOnboarding(true);
@@ -82,83 +83,104 @@ export default function DashboardPage() {
       {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
       
       <DashboardLayout>
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-            <p className="text-muted-foreground">Welcome back! Here's your overview.</p>
+        <div className="space-y-8">
+          {/* Hero Section */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-primary/20 p-8">
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <span className="text-sm font-medium text-primary">Professional Dashboard</span>
+              </div>
+              <h1 className="text-4xl font-bold mb-2">Welcome Back</h1>
+              <p className="text-lg text-muted-foreground max-w-2xl">
+                Your AI-powered content creation platform. Generate professional videos, logos, and digital products with advanced AI technology.
+              </p>
+            </div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-border/50 hover:border-primary/30 transition-colors">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Available Credits</CardTitle>
-                <Coins className="h-4 w-4 text-primary" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">Available Credits</CardTitle>
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Coins className="h-4 w-4 text-primary" />
+                </div>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <Skeleton className="h-8 w-20" />
-                ) : (
-                  <div className="text-2xl font-bold">{stats?.credits || 0}</div>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">
-                  <Link href="/plans" className="text-primary hover:underline">
-                    Buy more credits
-                  </Link>
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 hover:border-primary/30 transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
-                <Video className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-10 w-24" />
                 ) : (
                   <>
-                    <div className="text-2xl font-bold">{stats?.totalJobs || 0}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {stats?.completedJobs || 0} completed
-                    </p>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 hover:border-primary/30 transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avatars</CardTitle>
-                <Users className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Skeleton className="h-8 w-20" />
-                ) : (
-                  <>
-                    <div className="text-2xl font-bold">{stats?.avatarsCount || 0}</div>
-                    <Link href="/avatars" className="text-xs text-primary hover:underline mt-1 inline-block">
-                      Manage avatars
+                    <div className="text-3xl font-bold mb-1">{stats?.credits || 0}</div>
+                    <Link href="/plans" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+                      <Zap className="h-3 w-3" />
+                      Buy more credits
                     </Link>
                   </>
                 )}
               </CardContent>
             </Card>
 
-            <Card className="border-border/50 hover:border-primary/30 transition-colors">
+            <Card className="border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Marketplace</CardTitle>
-                <ShoppingBag className="h-4 w-4 text-primary" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Video className="h-4 w-4 text-primary" />
+                </div>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-10 w-24" />
                 ) : (
                   <>
-                    <div className="text-2xl font-bold">{stats?.productsCount || 0}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <div className="text-3xl font-bold mb-1">{stats?.totalJobs || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {stats?.completedJobs || 0} completed · {stats?.failedJobs || 0} failed
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Avatars</CardTitle>
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Users className="h-4 w-4 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Skeleton className="h-10 w-24" />
+                ) : (
+                  <>
+                    <div className="text-3xl font-bold mb-1">{stats?.avatarsCount || 0}</div>
+                    <Link href="/avatars" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+                      Manage avatars →
+                    </Link>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Marketplace</CardTitle>
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <ShoppingBag className="h-4 w-4 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Skeleton className="h-10 w-24" />
+                ) : (
+                  <>
+                    <div className="text-3xl font-bold mb-1">{stats?.productsCount || 0}</div>
+                    <p className="text-xs text-muted-foreground">
                       ${((stats?.totalSales || 0) / 100).toFixed(2)} in sales
                     </p>
                   </>
@@ -168,18 +190,21 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Recent Jobs - Take 2 columns */}
+            {/* Recent Jobs */}
             <div className="lg:col-span-2">
               <Card className="border-border/50">
                 <CardHeader>
-                  <CardTitle>Recent Jobs</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Video className="h-5 w-5 text-primary" />
+                    Recent Jobs
+                  </CardTitle>
                   <CardDescription>Your latest content generation tasks</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-16 w-full" />
+                        <Skeleton key={i} className="h-20 w-full" />
                       ))}
                     </div>
                   ) : recentJobs.length > 0 ? (
@@ -187,16 +212,24 @@ export default function DashboardPage() {
                       {recentJobs.map((job) => (
                         <div
                           key={job.id}
-                          className="flex items-center justify-between rounded-lg border border-border/50 p-3 hover:border-primary/30 transition-colors"
+                          className="flex items-center justify-between rounded-xl border border-border/50 p-4 hover:border-primary/30 hover:bg-card/50 transition-all"
                         >
-                          <div className="flex items-center gap-3">
-                            {job.status === "completed" ? (
-                              <CheckCircle className="h-5 w-5 text-green-500" />
-                            ) : job.status === "failed" ? (
-                              <XCircle className="h-5 w-5 text-red-500" />
-                            ) : (
-                              <Clock className="h-5 w-5 text-primary" />
-                            )}
+                          <div className="flex items-center gap-4">
+                            <div className={`p-2 rounded-lg ${
+                              job.status === "completed" 
+                                ? "bg-primary/10 border border-primary/20" 
+                                : job.status === "failed" 
+                                ? "bg-destructive/10 border border-destructive/20"
+                                : "bg-muted border border-border"
+                            }`}>
+                              {job.status === "completed" ? (
+                                <CheckCircle className="h-5 w-5 text-primary" />
+                              ) : job.status === "failed" ? (
+                                <XCircle className="h-5 w-5 text-destructive" />
+                              ) : (
+                                <Clock className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </div>
                             <div>
                               <p className="font-medium capitalize">{job.type} Generation</p>
                               <p className="text-sm text-muted-foreground">
@@ -204,22 +237,41 @@ export default function DashboardPage() {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm capitalize">{job.status}</span>
-                            {job.progress !== undefined && job.status === "processing" && (
-                              <span className="text-sm text-muted-foreground">
-                                {job.progress}%
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <span className={`text-sm font-medium capitalize ${
+                                job.status === "completed" 
+                                  ? "text-primary" 
+                                  : job.status === "failed" 
+                                  ? "text-destructive"
+                                  : "text-muted-foreground"
+                              }`}>
+                                {job.status}
                               </span>
-                            )}
+                              {job.progress !== undefined && job.status === "processing" && (
+                                <p className="text-xs text-muted-foreground">
+                                  {job.progress}%
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground mb-4">No jobs yet</p>
+                    <div className="text-center py-12">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                        <Video className="h-8 w-8 text-primary" />
+                      </div>
+                      <p className="text-muted-foreground mb-4 text-lg">No jobs yet</p>
+                      <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                        Start creating professional AI-generated content with advanced features
+                      </p>
                       <Link href="/jobs">
-                        <Button className="bg-primary hover:bg-primary/90">Create Your First Job</Button>
+                        <Button className="bg-primary hover:bg-primary/90">
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Create Your First Job
+                        </Button>
                       </Link>
                     </div>
                   )}
@@ -227,7 +279,7 @@ export default function DashboardPage() {
               </Card>
             </div>
 
-            {/* Plan Usage - Take 1 column */}
+            {/* Plan Usage */}
             <div>
               <PlanUsageIndicator />
             </div>

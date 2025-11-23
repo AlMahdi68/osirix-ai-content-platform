@@ -14,8 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Users, Loader2, Trash2, Eye, Sparkles, LayoutDashboard, Zap } from "lucide-react";
+import { Users, Loader2, Trash2, Eye, Sparkles, LayoutDashboard, Zap, TrendingUp, DollarSign, Target, Crown } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 interface AICharacter {
   id: number;
@@ -31,100 +32,148 @@ interface AICharacter {
 
 const characterTemplates = [
   {
-    id: "professional-presenter",
-    name: "Professional Presenter",
+    id: "tech-influencer",
+    name: "Tech Influencer",
     gradient: "from-blue-600 to-cyan-500",
-    icon: "👔",
-    personality: "Confident, articulate, and authoritative. Speaks with clarity and commands attention.",
-    backstory: "Former news anchor with 15 years of broadcasting experience. Master of clear communication and audience engagement.",
-    voiceStyle: "Professional, clear, well-paced",
-    traits: ["Confident", "Articulate", "Professional", "Engaging", "Trustworthy"],
-    useCases: ["Corporate presentations", "Product demos", "Training videos"],
-    examples: [
-      "Business webinars and presentations",
-      "Product launch announcements",
-      "Professional training content"
-    ]
-  },
-  {
-    id: "friendly-educator",
-    name: "Friendly Educator",
-    gradient: "from-green-500 to-emerald-500",
-    icon: "🎓",
-    personality: "Warm, patient, and encouraging. Makes complex topics easy to understand with enthusiasm.",
-    backstory: "Award-winning teacher passionate about making learning fun and accessible for everyone.",
-    voiceStyle: "Warm, enthusiastic, patient",
-    traits: ["Patient", "Encouraging", "Clear", "Enthusiastic", "Supportive"],
-    useCases: ["Educational content", "Tutorials", "Explainer videos"],
-    examples: [
-      "Online course instruction",
-      "How-to tutorials and guides",
-      "Educational explainer videos"
-    ]
-  },
-  {
-    id: "energetic-host",
-    name: "Energetic Host",
-    gradient: "from-orange-500 to-red-500",
-    icon: "🎬",
-    personality: "Dynamic, charismatic, and entertaining. Brings energy and excitement to every moment.",
-    backstory: "Popular YouTuber and content creator known for keeping audiences engaged and entertained.",
-    voiceStyle: "Energetic, dynamic, expressive",
-    traits: ["Charismatic", "Energetic", "Fun", "Engaging", "Dynamic"],
-    useCases: ["Entertainment content", "Vlogs", "Social media"],
-    examples: [
-      "YouTube channel hosting",
-      "Entertainment vlogs",
-      "Social media content"
-    ]
-  },
-  {
-    id: "calming-narrator",
-    name: "Calming Narrator",
-    gradient: "from-purple-500 to-indigo-500",
-    icon: "🎙️",
-    personality: "Soothing, contemplative, and serene. Creates a peaceful atmosphere with every word.",
-    backstory: "Meditation guide and audiobook narrator with a gift for creating tranquil experiences.",
-    voiceStyle: "Calm, soothing, measured",
-    traits: ["Soothing", "Peaceful", "Contemplative", "Gentle", "Serene"],
-    useCases: ["Meditation", "Audiobooks", "Relaxation content"],
-    examples: [
-      "Meditation and mindfulness guides",
-      "Audiobook narration",
-      "Sleep and relaxation content"
-    ]
-  },
-  {
-    id: "tech-expert",
-    name: "Tech Expert",
-    gradient: "from-cyan-500 to-blue-700",
     icon: "💻",
-    personality: "Knowledgeable, precise, and innovative. Explains technology with clarity and expertise.",
-    backstory: "Senior software engineer and tech reviewer with deep expertise in cutting-edge technology.",
-    voiceStyle: "Precise, knowledgeable, clear",
-    traits: ["Expert", "Analytical", "Precise", "Innovative", "Clear"],
-    useCases: ["Tech reviews", "Software tutorials", "Developer content"],
+    personality: "Tech-savvy, innovative, and analytical. Reviews gadgets with expertise and excitement.",
+    backstory: "Former software engineer turned tech reviewer with 500K+ followers. Known for honest, in-depth product analysis.",
+    voiceStyle: "Knowledgeable, enthusiastic, technical",
+    traits: ["Analytical", "Innovative", "Authentic", "Detail-oriented", "Engaging"],
+    useCases: ["Tech reviews", "Gadget unboxings", "Software tutorials"],
     examples: [
-      "Technology reviews and analysis",
-      "Software development tutorials",
-      "Tech industry updates"
-    ]
+      "Smartphone and laptop reviews",
+      "Tech industry news and analysis",
+      "Software and app demonstrations"
+    ],
+    niche: "Technology",
+    monetization: ["Affiliate links", "Sponsorships", "Tech brand deals"]
   },
   {
-    id: "motivational-coach",
-    name: "Motivational Coach",
-    gradient: "from-yellow-500 to-amber-600",
+    id: "fitness-coach",
+    name: "Fitness Coach",
+    gradient: "from-orange-500 to-red-600",
     icon: "💪",
-    personality: "Inspiring, empowering, and uplifting. Motivates people to achieve their best potential.",
-    backstory: "Life coach and motivational speaker dedicated to helping people unlock their full potential.",
-    voiceStyle: "Inspiring, powerful, uplifting",
-    traits: ["Inspiring", "Empowering", "Passionate", "Supportive", "Driven"],
-    useCases: ["Motivational content", "Coaching", "Personal development"],
+    personality: "Motivating, disciplined, and results-driven. Inspires followers to achieve their fitness goals.",
+    backstory: "Certified personal trainer and nutritionist with 1M+ followers. Transformed 10,000+ lives through online coaching.",
+    voiceStyle: "Motivational, powerful, encouraging",
+    traits: ["Motivating", "Disciplined", "Energetic", "Supportive", "Results-focused"],
+    useCases: ["Workout videos", "Nutrition advice", "Transformation stories"],
     examples: [
-      "Motivational speeches and content",
-      "Personal development coaching",
-      "Fitness and wellness motivation"
-    ]
+      "Home workout routines and challenges",
+      "Meal prep and nutrition guides",
+      "Fitness motivation and mindset content"
+    ],
+    niche: "Fitness & Health",
+    monetization: ["Coaching programs", "Supplement partnerships", "Online courses"]
+  },
+  {
+    id: "beauty-guru",
+    name: "Beauty Guru",
+    gradient: "from-pink-500 to-purple-600",
+    icon: "💄",
+    personality: "Stylish, creative, and trendsetting. Shares beauty tips with confidence and flair.",
+    backstory: "Makeup artist and beauty expert with 800K+ followers. Known for viral tutorials and product reviews.",
+    voiceStyle: "Friendly, confident, expressive",
+    traits: ["Creative", "Trendy", "Confident", "Detailed", "Relatable"],
+    useCases: ["Makeup tutorials", "Product reviews", "Beauty tips"],
+    examples: [
+      "Step-by-step makeup transformations",
+      "Skincare routines and product testing",
+      "Beauty trends and style guides"
+    ],
+    niche: "Beauty & Fashion",
+    monetization: ["Brand partnerships", "Affiliate sales", "Beauty courses"]
+  },
+  {
+    id: "business-mentor",
+    name: "Business Mentor",
+    gradient: "from-amber-600 to-yellow-500",
+    icon: "💼",
+    personality: "Strategic, experienced, and insightful. Teaches entrepreneurship with proven methods.",
+    backstory: "Serial entrepreneur and business consultant with $50M+ in exits. Mentoring the next generation of founders.",
+    voiceStyle: "Professional, authoritative, insightful",
+    traits: ["Strategic", "Experienced", "Insightful", "Results-driven", "Practical"],
+    useCases: ["Business advice", "Startup tips", "Marketing strategies"],
+    examples: [
+      "Startup launch strategies and funding",
+      "Marketing and sales tactics",
+      "Leadership and team building"
+    ],
+    niche: "Business & Entrepreneurship",
+    monetization: ["Consulting services", "Masterclasses", "Speaking engagements"]
+  },
+  {
+    id: "lifestyle-vlogger",
+    name: "Lifestyle Vlogger",
+    gradient: "from-emerald-500 to-teal-600",
+    icon: "🌟",
+    personality: "Authentic, relatable, and inspiring. Shares daily life with genuine enthusiasm.",
+    backstory: "Content creator and lifestyle influencer with 600K+ followers. Building a community around authentic living.",
+    voiceStyle: "Friendly, conversational, warm",
+    traits: ["Authentic", "Relatable", "Positive", "Creative", "Engaging"],
+    useCases: ["Daily vlogs", "Life advice", "Product recommendations"],
+    examples: [
+      "Day-in-the-life vlogs and routines",
+      "Home decor and lifestyle tips",
+      "Product hauls and recommendations"
+    ],
+    niche: "Lifestyle & Vlogging",
+    monetization: ["Brand deals", "Merchandise", "Affiliate marketing"]
+  },
+  {
+    id: "finance-expert",
+    name: "Finance Expert",
+    gradient: "from-indigo-600 to-blue-700",
+    icon: "📈",
+    personality: "Analytical, trustworthy, and educational. Simplifies complex financial concepts.",
+    backstory: "Financial advisor and investing expert with 300K+ followers. Helping people achieve financial freedom.",
+    voiceStyle: "Clear, trustworthy, educational",
+    traits: ["Analytical", "Trustworthy", "Educational", "Practical", "Clear"],
+    useCases: ["Investment advice", "Money management", "Financial education"],
+    examples: [
+      "Stock market analysis and tips",
+      "Budgeting and saving strategies",
+      "Cryptocurrency and investment guides"
+    ],
+    niche: "Finance & Investing",
+    monetization: ["Financial courses", "Newsletter subscriptions", "Investment tools"]
+  },
+  {
+    id: "food-creator",
+    name: "Food Creator",
+    gradient: "from-rose-500 to-orange-600",
+    icon: "🍳",
+    personality: "Passionate, creative, and appetizing. Makes cooking fun and accessible for everyone.",
+    backstory: "Professional chef and food blogger with 900K+ followers. Famous for easy, delicious recipes.",
+    voiceStyle: "Enthusiastic, warm, descriptive",
+    traits: ["Creative", "Passionate", "Detailed", "Fun", "Approachable"],
+    useCases: ["Recipe videos", "Cooking tips", "Food reviews"],
+    examples: [
+      "Quick and easy recipe tutorials",
+      "Restaurant and food reviews",
+      "Cooking hacks and kitchen tips"
+    ],
+    niche: "Food & Cooking",
+    monetization: ["Cookbook sales", "Kitchen product partnerships", "Cooking classes"]
+  },
+  {
+    id: "gaming-streamer",
+    name: "Gaming Streamer",
+    gradient: "from-violet-600 to-purple-700",
+    icon: "🎮",
+    personality: "Entertaining, competitive, and community-focused. Brings energy to every gaming session.",
+    backstory: "Professional gamer and content creator with 1.2M+ followers. Known for epic gameplay and humor.",
+    voiceStyle: "Energetic, entertaining, competitive",
+    traits: ["Entertaining", "Skilled", "Competitive", "Engaging", "Fun"],
+    useCases: ["Gaming content", "Live streams", "Game reviews"],
+    examples: [
+      "Live gameplay and walkthroughs",
+      "Gaming news and reviews",
+      "E-sports commentary and analysis"
+    ],
+    niche: "Gaming & Entertainment",
+    monetization: ["Sponsorships", "Donations", "Gaming partnerships"]
   }
 ];
 
@@ -292,46 +341,70 @@ export default function AICharactersPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container py-12">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <Users className="h-10 w-10 text-primary gold-glow" />
-              AI Character Generator
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Create unique AI characters with personality and backstory
-            </p>
+      <div className="container py-12 max-w-7xl">
+        {/* Hero Header */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-primary/20 p-8 mb-8">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-primary">AI Social Media Influencer</span>
+                </div>
+                <h1 className="text-4xl font-bold mb-3">AI Character Creator</h1>
+                <p className="text-lg text-muted-foreground max-w-2xl">
+                  Create your AI influencer persona with unique personality, voice, and monetization strategy
+                </p>
+                <div className="flex items-center gap-4 mt-4">
+                  <Badge variant="outline" className="border-primary/30 text-primary px-3 py-1">
+                    <TrendingUp className="mr-1 h-3 w-3" />
+                    Viral Content
+                  </Badge>
+                  <Badge variant="outline" className="border-primary/30 text-primary px-3 py-1">
+                    <DollarSign className="mr-1 h-3 w-3" />
+                    Monetization Ready
+                  </Badge>
+                  <Badge variant="outline" className="border-primary/30 text-primary px-3 py-1">
+                    <Target className="mr-1 h-3 w-3" />
+                    Niche Targeting
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => router.push("/dashboard")}
+                  variant="outline"
+                  className="border-primary/30"
+                >
+                  <LayoutDashboard className="mr-2 h-5 w-5" />
+                  Dashboard
+                </Button>
+                <Button
+                  onClick={() => setShowTemplates(true)}
+                  variant="outline"
+                  className="border-primary/30"
+                >
+                  <Eye className="mr-2 h-5 w-5" />
+                  Templates
+                </Button>
+                <Button
+                  onClick={() => setShowForm(!showForm)}
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Create Character
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Button
-              onClick={() => router.push("/dashboard")}
-              variant="outline"
-              className="border-primary/30"
-            >
-              <LayoutDashboard className="mr-2 h-5 w-5" />
-              Back to Dashboard
-            </Button>
-            <Button
-              onClick={() => setShowTemplates(true)}
-              variant="outline"
-              className="border-primary/30"
-            >
-              <Eye className="mr-2 h-5 w-5" />
-              View Templates
-            </Button>
-            <Button
-              onClick={() => setShowForm(!showForm)}
-              className="bg-primary hover:bg-primary/90 gold-glow"
-            >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Create Character
-            </Button>
-          </div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
         </div>
 
         {showForm && (
-          <Card className="p-8 mb-8 border-primary/30 gold-glow">
+          <Card className="p-8 mb-8 border-primary/30">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -446,20 +519,22 @@ export default function AICharactersPage() {
         )}
 
         {characters.length === 0 ? (
-          <Card className="p-12 text-center border-dashed">
-            <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No characters yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Create your first AI character or explore our templates
+          <Card className="p-16 text-center border-dashed">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-6">
+              <Users className="h-10 w-10 text-primary" />
+            </div>
+            <h3 className="text-2xl font-semibold mb-3">Create Your AI Influencer</h3>
+            <p className="text-muted-foreground mb-6 text-lg max-w-md mx-auto">
+              Choose from professional templates or create a custom AI character for your niche
             </p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={() => setShowTemplates(true)} variant="outline">
-                <Eye className="mr-2 h-4 w-4" />
-                View Templates
+              <Button onClick={() => setShowTemplates(true)} variant="outline" size="lg">
+                <Eye className="mr-2 h-5 w-5" />
+                Browse Templates
               </Button>
-              <Button onClick={() => setShowForm(true)}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Create Character
+              <Button onClick={() => setShowForm(true)} size="lg">
+                <Sparkles className="mr-2 h-5 w-5" />
+                Create Custom
               </Button>
             </div>
           </Card>
@@ -535,39 +610,42 @@ export default function AICharactersPage() {
 
         {/* Templates Gallery Dialog */}
         <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-2xl">
-                <Zap className="h-6 w-6 text-primary" />
-                Character Templates
+              <DialogTitle className="flex items-center gap-2 text-3xl mb-2">
+                <Crown className="h-7 w-7 text-primary" />
+                AI Influencer Templates
               </DialogTitle>
-              <p className="text-muted-foreground">
-                Explore professional character archetypes and personalities
+              <p className="text-muted-foreground text-base">
+                Choose your niche and create a professional AI influencer in seconds
               </p>
             </DialogHeader>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-6">
               {characterTemplates.map((template) => (
                 <Card
                   key={template.id}
-                  className="overflow-hidden hover:border-primary/50 transition-all duration-300 group cursor-pointer"
+                  className="overflow-hidden hover:border-primary/50 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:shadow-primary/10"
                   onClick={() => setPreviewTemplate(template)}
                 >
-                  <div className={`h-32 bg-gradient-to-br ${template.gradient} relative flex flex-col items-center justify-center text-white`}>
-                    <div className="text-5xl mb-2">{template.icon}</div>
+                  <div className={`h-40 bg-gradient-to-br ${template.gradient} relative flex flex-col items-center justify-center text-white p-6`}>
+                    <div className="text-6xl mb-3">{template.icon}</div>
+                    <Badge className="bg-background/90 text-foreground hover:bg-background">
+                      {template.niche}
+                    </Badge>
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
                   </div>
-                  <div className="p-4">
+                  <div className="p-5">
                     <h3 className="font-bold mb-2 text-lg group-hover:text-primary transition-colors">
                       {template.name}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                       {template.personality}
                     </p>
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-1.5 mb-4">
                       {template.traits.slice(0, 3).map((trait, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 bg-primary/10 text-primary text-xs rounded"
+                          className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded"
                         >
                           {trait}
                         </span>
@@ -593,41 +671,52 @@ export default function AICharactersPage() {
 
         {/* Template Preview Dialog */}
         <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <div className={`-mx-6 -mt-6 mb-6 h-48 bg-gradient-to-br ${previewTemplate?.gradient} flex items-center justify-center`}>
-                <div className="text-center text-white">
-                  <div className="text-6xl mb-4">{previewTemplate?.icon}</div>
-                  <DialogTitle className="text-3xl font-bold">{previewTemplate?.name}</DialogTitle>
-                  <p className="text-sm mt-2 opacity-90">{previewTemplate?.voiceStyle}</p>
+              <div className={`-mx-6 -mt-6 mb-6 h-56 bg-gradient-to-br ${previewTemplate?.gradient} flex items-center justify-center relative overflow-hidden`}>
+                <div className="text-center text-white relative z-10">
+                  <div className="text-7xl mb-4">{previewTemplate?.icon}</div>
+                  <DialogTitle className="text-3xl font-bold mb-2">{previewTemplate?.name}</DialogTitle>
+                  <Badge className="bg-white/20 text-white backdrop-blur-sm mb-2">
+                    {previewTemplate?.niche}
+                  </Badge>
+                  <p className="text-sm opacity-90">{previewTemplate?.voiceStyle}</p>
                 </div>
+                <div className="absolute inset-0 bg-black/10"></div>
               </div>
             </DialogHeader>
             {previewTemplate && (
               <div className="space-y-6">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Personality</p>
-                  <p className="text-base">{previewTemplate.personality}</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Personality Profile
+                  </p>
+                  <p className="text-base leading-relaxed">{previewTemplate.personality}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Backstory</p>
-                  <p className="text-base">{previewTemplate.backstory}</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-2">Background Story</p>
+                  <p className="text-base leading-relaxed">{previewTemplate.backstory}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-3">Character Traits</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-3">Character Traits</p>
                   <div className="flex flex-wrap gap-2">
                     {previewTemplate.traits.map((trait, idx) => (
-                      <span
+                      <Badge
                         key={idx}
-                        className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
+                        variant="outline"
+                        className="px-3 py-1 border-primary/30"
                       >
                         {trait}
-                      </span>
+                      </Badge>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-3">Ideal Use Cases</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    Content Examples
+                  </p>
                   <ul className="space-y-2">
                     {previewTemplate.examples.map((example, idx) => (
                       <li key={idx} className="flex items-start gap-2">
@@ -638,15 +727,18 @@ export default function AICharactersPage() {
                   </ul>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Best For</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Monetization Strategies
+                  </p>
                   <div className="flex flex-wrap gap-2">
-                    {previewTemplate.useCases.map((useCase, idx) => (
-                      <span
+                    {previewTemplate.monetization.map((method, idx) => (
+                      <Badge
                         key={idx}
-                        className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full"
+                        className="bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1"
                       >
-                        {useCase}
-                      </span>
+                        {method}
+                      </Badge>
                     ))}
                   </div>
                 </div>
@@ -655,8 +747,8 @@ export default function AICharactersPage() {
                   size="lg"
                   onClick={() => handleUseTemplate(previewTemplate)}
                 >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Use This Template
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Create This AI Influencer
                 </Button>
               </div>
             )}

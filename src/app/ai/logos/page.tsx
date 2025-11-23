@@ -21,8 +21,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Wand2, Loader2, Palette, Trash2, Download, LayoutDashboard, Eye, Sparkles } from "lucide-react";
+import { Wand2, Loader2, Palette, Trash2, Download, LayoutDashboard, Eye, Sparkles, Crown, Gift, Type } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 interface AILogo {
   id: number;
@@ -35,6 +36,98 @@ interface AILogo {
   createdAt: string;
 }
 
+const fontStyles = [
+  { value: "modern-sans", label: "Modern Sans", desc: "Clean, contemporary, perfect for tech" },
+  { value: "bold-serif", label: "Bold Serif", desc: "Classic, authoritative, professional" },
+  { value: "handwritten", label: "Handwritten", desc: "Personal, authentic, creative" },
+  { value: "elegant-script", label: "Elegant Script", desc: "Sophisticated, luxury, refined" },
+  { value: "geometric", label: "Geometric", desc: "Structured, minimal, modern" },
+  { value: "playful-rounded", label: "Playful Rounded", desc: "Friendly, approachable, fun" },
+];
+
+const nicheTemplates = [
+  {
+    id: "tech",
+    name: "Technology",
+    icon: "💻",
+    gradient: "from-blue-600 to-cyan-500",
+    colors: ["#3B82F6", "#06B6D4", "#1E40AF"],
+    prompt: "Modern tech logo with circuit patterns, minimalist geometric shapes, innovation and digital focus",
+    fonts: ["modern-sans", "geometric"],
+    examples: ["Neural network visualization", "Abstract data flow", "Futuristic tech icon"]
+  },
+  {
+    id: "fitness",
+    name: "Fitness & Health",
+    icon: "💪",
+    gradient: "from-orange-500 to-red-600",
+    colors: ["#F97316", "#EF4444", "#DC2626"],
+    prompt: "Dynamic fitness logo with movement energy, strength symbols, athletic and motivational design",
+    fonts: ["bold-serif", "geometric"],
+    examples: ["Muscular silhouette", "Dynamic motion lines", "Power symbol"]
+  },
+  {
+    id: "beauty",
+    name: "Beauty & Fashion",
+    icon: "💄",
+    gradient: "from-pink-500 to-purple-600",
+    colors: ["#EC4899", "#A855F7", "#D946EF"],
+    prompt: "Elegant beauty logo with feminine curves, luxurious aesthetic, sophisticated makeup theme",
+    fonts: ["elegant-script", "modern-sans"],
+    examples: ["Lipstick silhouette", "Fashion icon", "Elegant flourish"]
+  },
+  {
+    id: "business",
+    name: "Business",
+    icon: "💼",
+    gradient: "from-amber-600 to-yellow-500",
+    colors: ["#D97706", "#F59E0B", "#B45309"],
+    prompt: "Professional business logo with corporate feel, growth symbols, trust and success imagery",
+    fonts: ["bold-serif", "modern-sans"],
+    examples: ["Upward trending arrow", "Connected network", "Summit achievement"]
+  },
+  {
+    id: "lifestyle",
+    name: "Lifestyle",
+    icon: "🌟",
+    gradient: "from-emerald-500 to-teal-600",
+    colors: ["#10B981", "#14B8A6", "#059669"],
+    prompt: "Authentic lifestyle logo with organic shapes, relatable aesthetics, community feeling",
+    fonts: ["handwritten", "playful-rounded"],
+    examples: ["Heart with home", "Sunshine rays", "Natural leaf"]
+  },
+  {
+    id: "finance",
+    name: "Finance",
+    icon: "📈",
+    gradient: "from-indigo-600 to-blue-700",
+    colors: ["#4F46E5", "#1D4ED8", "#3730A3"],
+    prompt: "Trustworthy finance logo with stability symbols, growth charts, professional money theme",
+    fonts: ["bold-serif", "geometric"],
+    examples: ["Upward graph", "Currency symbol", "Shield with coin"]
+  },
+  {
+    id: "food",
+    name: "Food & Cooking",
+    icon: "🍳",
+    gradient: "from-rose-500 to-orange-600",
+    colors: ["#F43F5E", "#FB923C", "#EA580C"],
+    prompt: "Appetizing food logo with culinary elements, delicious aesthetics, chef-inspired design",
+    fonts: ["playful-rounded", "elegant-script"],
+    examples: ["Chef hat", "Fork and spoon", "Steaming plate"]
+  },
+  {
+    id: "gaming",
+    name: "Gaming",
+    icon: "🎮",
+    gradient: "from-violet-600 to-purple-700",
+    colors: ["#7C3AED", "#9333EA", "#6B21A8"],
+    prompt: "Dynamic gaming logo with esports energy, controller elements, competitive gaming theme",
+    fonts: ["bold-serif", "geometric"],
+    examples: ["Game controller", "Trophy emblem", "Power-up icon"]
+  },
+];
+
 const logoTemplates = [
   {
     id: "modern-tech",
@@ -43,6 +136,7 @@ const logoTemplates = [
     colors: ["#FFD700", "#000000", "#FFFFFF"],
     gradient: "from-yellow-400 to-amber-600",
     prompt: "Sleek modern tech company logo with geometric shapes, clean lines, and minimal design",
+    fonts: ["modern-sans", "geometric"],
     examples: [
       "Abstract geometric cube representing innovation",
       "Interconnected nodes symbolizing connectivity",
@@ -56,6 +150,7 @@ const logoTemplates = [
     colors: ["#8B4513", "#F5DEB3", "#2F4F4F"],
     gradient: "from-amber-700 to-orange-900",
     prompt: "Vintage badge-style logo with ornate borders, classic typography, and timeless elegance",
+    fonts: ["bold-serif", "elegant-script"],
     examples: [
       "Circular emblem with decorative flourishes",
       "Retro ribbon banner with serif typography",
@@ -69,51 +164,13 @@ const logoTemplates = [
     colors: ["#000000", "#FFFFFF", "#808080"],
     gradient: "from-gray-300 to-gray-600",
     prompt: "Ultra-minimalist logo with simple shapes, negative space, and zen-like simplicity",
+    fonts: ["geometric", "modern-sans"],
     examples: [
       "Single continuous line forming abstract shape",
       "Negative space revealing hidden symbol",
       "Simple letter mark with perfect proportions"
     ]
   },
-  {
-    id: "abstract-creative",
-    name: "Abstract Creative",
-    style: "abstract",
-    colors: ["#FF00FF", "#00FFFF", "#FFD700"],
-    gradient: "from-purple-500 via-pink-500 to-cyan-500",
-    prompt: "Bold abstract design with fluid shapes, dynamic movement, and artistic expression",
-    examples: [
-      "Flowing liquid shapes creating organic form",
-      "Intersecting geometric abstractions",
-      "Gradient morphing abstract composition"
-    ]
-  },
-  {
-    id: "geometric-precision",
-    name: "Geometric Precision",
-    style: "geometric",
-    colors: ["#4169E1", "#FF6347", "#FFD700"],
-    gradient: "from-blue-500 to-indigo-700",
-    prompt: "Precise geometric logo with perfect angles, mathematical harmony, and structural balance",
-    examples: [
-      "Sacred geometry hexagonal pattern",
-      "Isometric cube with golden ratio",
-      "Tessellating triangular formation"
-    ]
-  },
-  {
-    id: "organic-natural",
-    name: "Organic Natural",
-    style: "organic",
-    colors: ["#228B22", "#8FBC8F", "#F0E68C"],
-    gradient: "from-green-500 to-emerald-700",
-    prompt: "Flowing organic logo inspired by nature, with soft curves, leaf motifs, and natural harmony",
-    examples: [
-      "Stylized leaf with flowing curves",
-      "Tree silhouette with root system",
-      "Wave patterns mimicking natural flow"
-    ]
-  }
 ];
 
 export default function AILogosPage() {
@@ -125,13 +182,17 @@ export default function AILogosPage() {
   const [showForm, setShowForm] = useState(false);
   const [previewLogo, setPreviewLogo] = useState<AILogo | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showNicheGen, setShowNicheGen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<typeof logoTemplates[0] | null>(null);
+  const [previewNiche, setPreviewNiche] = useState<typeof nicheTemplates[0] | null>(null);
+  const [selectedFont, setSelectedFont] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
     prompt: "",
     style: "modern",
     colors: "",
+    font: "modern-sans",
   });
 
   useEffect(() => {
@@ -191,6 +252,7 @@ export default function AILogosPage() {
           style: formData.style,
           colors: colorsArray,
           status: "generating",
+          font: formData.font,
         }),
       });
 
@@ -202,6 +264,7 @@ export default function AILogosPage() {
           prompt: "",
           style: "modern",
           colors: "",
+          font: "modern-sans",
         });
         fetchLogos();
       } else {
@@ -216,12 +279,27 @@ export default function AILogosPage() {
     }
   };
 
+  const handleFreeNicheLogo = (niche: typeof nicheTemplates[0]) => {
+    setFormData({
+      name: `${niche.name} Logo`,
+      prompt: niche.prompt,
+      style: "modern",
+      colors: niche.colors.join(", "),
+      font: niche.fonts[0],
+    });
+    setShowNicheGen(false);
+    setShowForm(true);
+    setPreviewNiche(null);
+    toast.success("Free logo template applied! Customize and generate.");
+  };
+
   const handleUseTemplate = (template: typeof logoTemplates[0]) => {
     setFormData({
       name: `${template.name} Logo`,
       prompt: template.prompt,
       style: template.style,
       colors: template.colors.join(", "),
+      font: template.fonts[0],
     });
     setShowTemplates(false);
     setShowForm(true);
@@ -263,46 +341,78 @@ export default function AILogosPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container py-12">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <Palette className="h-10 w-10 text-primary gold-glow" />
-              AI Logo Generator
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Create stunning logos with AI-powered design
-            </p>
+      <div className="container py-12 max-w-7xl">
+        {/* Hero Header */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-primary/20 p-8 mb-8">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                    <Palette className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-primary">Professional Logo Design</span>
+                </div>
+                <h1 className="text-4xl font-bold mb-3">AI Logo Generator</h1>
+                <p className="text-lg text-muted-foreground max-w-2xl">
+                  Create stunning logos with multiple fonts, styles, and niche-specific templates
+                </p>
+                <div className="flex items-center gap-4 mt-4">
+                  <Badge variant="outline" className="border-primary/30 text-primary px-3 py-1">
+                    <Type className="mr-1 h-3 w-3" />
+                    Multiple Fonts
+                  </Badge>
+                  <Badge variant="outline" className="border-primary/30 text-primary px-3 py-1">
+                    <Sparkles className="mr-1 h-3 w-3" />
+                    AI-Powered
+                  </Badge>
+                  <Badge variant="outline" className="border-primary/30 text-primary px-3 py-1">
+                    <Gift className="mr-1 h-3 w-3" />
+                    Free Niche Logos
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => router.push("/dashboard")}
+                  variant="outline"
+                  className="border-primary/30"
+                >
+                  <LayoutDashboard className="mr-2 h-5 w-5" />
+                  Dashboard
+                </Button>
+                <Button
+                  onClick={() => setShowNicheGen(true)}
+                  variant="outline"
+                  className="border-primary/30"
+                >
+                  <Gift className="mr-2 h-5 w-5" />
+                  Free Logo
+                </Button>
+                <Button
+                  onClick={() => setShowTemplates(true)}
+                  variant="outline"
+                  className="border-primary/30"
+                >
+                  <Eye className="mr-2 h-5 w-5" />
+                  Templates
+                </Button>
+                <Button
+                  onClick={() => setShowForm(!showForm)}
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Wand2 className="mr-2 h-5 w-5" />
+                  Generate Logo
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Button
-              onClick={() => router.push("/dashboard")}
-              variant="outline"
-              className="border-primary/30"
-            >
-              <LayoutDashboard className="mr-2 h-5 w-5" />
-              Back to Dashboard
-            </Button>
-            <Button
-              onClick={() => setShowTemplates(true)}
-              variant="outline"
-              className="border-primary/30"
-            >
-              <Eye className="mr-2 h-5 w-5" />
-              View Templates
-            </Button>
-            <Button
-              onClick={() => setShowForm(!showForm)}
-              className="bg-primary hover:bg-primary/90 gold-glow"
-            >
-              <Wand2 className="mr-2 h-5 w-5" />
-              Generate Logo
-            </Button>
-          </div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
         </div>
 
         {showForm && (
-          <Card className="p-8 mb-8 border-primary/30 gold-glow">
+          <Card className="p-8 mb-8 border-primary/30">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Logo Name *</Label>
@@ -331,7 +441,7 @@ export default function AILogosPage() {
                 />
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="style">Style *</Label>
                   <Select
@@ -350,6 +460,30 @@ export default function AILogosPage() {
                       <SelectItem value="abstract">Abstract</SelectItem>
                       <SelectItem value="geometric">Geometric</SelectItem>
                       <SelectItem value="organic">Organic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="font">Font Style *</Label>
+                  <Select
+                    value={formData.font}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, font: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fontStyles.map((font) => (
+                        <SelectItem key={font.value} value={font.value}>
+                          <div className="py-1">
+                            <div className="font-semibold">{font.label}</div>
+                            <div className="text-xs text-muted-foreground">{font.desc}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -399,20 +533,26 @@ export default function AILogosPage() {
         )}
 
         {logos.length === 0 ? (
-          <Card className="p-12 text-center border-dashed">
-            <Palette className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No logos yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Generate your first AI-powered logo or explore our templates
+          <Card className="p-16 text-center border-dashed">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-6">
+              <Palette className="h-10 w-10 text-primary" />
+            </div>
+            <h3 className="text-2xl font-semibold mb-3">Create Your First Logo</h3>
+            <p className="text-muted-foreground mb-6 text-lg max-w-md mx-auto">
+              Generate professional logos with AI or choose from niche-specific free templates
             </p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={() => setShowTemplates(true)} variant="outline">
-                <Eye className="mr-2 h-4 w-4" />
-                View Templates
+              <Button onClick={() => setShowNicheGen(true)} variant="outline" size="lg">
+                <Gift className="mr-2 h-5 w-5" />
+                Get Free Logo
               </Button>
-              <Button onClick={() => setShowForm(true)}>
-                <Wand2 className="mr-2 h-4 w-4" />
-                Generate Logo
+              <Button onClick={() => setShowTemplates(true)} variant="outline" size="lg">
+                <Eye className="mr-2 h-5 w-5" />
+                Browse Templates
+              </Button>
+              <Button onClick={() => setShowForm(true)} size="lg">
+                <Wand2 className="mr-2 h-5 w-5" />
+                Generate Custom
               </Button>
             </div>
           </Card>
@@ -496,6 +636,137 @@ export default function AILogosPage() {
             ))}
           </div>
         )}
+
+        {/* Free Niche Logo Dialog */}
+        <Dialog open={showNicheGen} onOpenChange={setShowNicheGen}>
+          <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-3xl mb-2">
+                <Gift className="h-7 w-7 text-primary" />
+                Free Niche Logo Generator
+              </DialogTitle>
+              <p className="text-muted-foreground text-base">
+                Choose your niche and get a professional logo template for free
+              </p>
+            </DialogHeader>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-6">
+              {nicheTemplates.map((niche) => (
+                <Card
+                  key={niche.id}
+                  className="overflow-hidden hover:border-primary/50 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:shadow-primary/10"
+                  onClick={() => setPreviewNiche(niche)}
+                >
+                  <div className={`h-40 bg-gradient-to-br ${niche.gradient} relative flex flex-col items-center justify-center text-white p-6`}>
+                    <div className="text-6xl mb-3">{niche.icon}</div>
+                    <Badge className="bg-primary text-primary-foreground">
+                      <Gift className="mr-1 h-3 w-3" />
+                      FREE
+                    </Badge>
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-bold mb-2 text-lg group-hover:text-primary transition-colors">
+                      {niche.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {niche.prompt}
+                    </p>
+                    <div className="flex gap-1.5 mb-4">
+                      {niche.colors.slice(0, 3).map((color, idx) => (
+                        <div
+                          key={idx}
+                          className="w-6 h-6 rounded-md border-2 border-white shadow-sm flex-shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFreeNicheLogo(niche);
+                      }}
+                    >
+                      <Wand2 className="mr-2 h-3 w-3" />
+                      Use Free Template
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Niche Preview Dialog */}
+        <Dialog open={!!previewNiche} onOpenChange={() => setPreviewNiche(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <div className={`-mx-6 -mt-6 mb-6 h-56 bg-gradient-to-br ${previewNiche?.gradient} flex items-center justify-center relative overflow-hidden`}>
+                <div className="text-center text-white relative z-10">
+                  <div className="text-7xl mb-4">{previewNiche?.icon}</div>
+                  <DialogTitle className="text-3xl font-bold mb-2">{previewNiche?.name}</DialogTitle>
+                  <Badge className="bg-primary text-primary-foreground">
+                    <Gift className="mr-1 h-3 w-3" />
+                    FREE TEMPLATE
+                  </Badge>
+                </div>
+                <div className="absolute inset-0 bg-black/10"></div>
+              </div>
+            </DialogHeader>
+            {previewNiche && (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground mb-2">Design Concept</p>
+                  <p className="text-base leading-relaxed">{previewNiche.prompt}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground mb-3">Color Palette</p>
+                  <div className="flex gap-3">
+                    {previewNiche.colors.map((color, idx) => (
+                      <div key={idx} className="flex flex-col items-center gap-2">
+                        <div
+                          className="w-16 h-16 rounded-lg border-2 border-border shadow-md"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-xs font-mono">{color}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground mb-3">Recommended Fonts</p>
+                  <div className="flex flex-wrap gap-2">
+                    {previewNiche.fonts.map((font, idx) => (
+                      <Badge key={idx} variant="outline" className="px-3 py-1">
+                        {fontStyles.find(f => f.value === font)?.label}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground mb-3">Example Concepts</p>
+                  <ul className="space-y-2">
+                    {previewNiche.examples.map((example, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{example}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => handleFreeNicheLogo(previewNiche)}
+                >
+                  <Wand2 className="mr-2 h-5 w-5" />
+                  Generate Free Logo
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Templates Gallery Dialog */}
         <Dialog open={showTemplates} onOpenChange={setShowTemplates}>

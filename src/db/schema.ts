@@ -336,3 +336,51 @@ export const aiAgentActivities = sqliteTable('ai_agent_activities', {
   metadata: text('metadata', { mode: 'json' }),
   createdAt: text('created_at').notNull(),
 });
+
+// Add sponsorship_opportunities table
+export const sponsorshipOpportunities = sqliteTable('sponsorship_opportunities', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  brandUserId: text('brand_user_id').notNull().references(() => user.id),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  category: text('category').notNull(),
+  budgetMin: integer('budget_min').notNull(),
+  budgetMax: integer('budget_max').notNull(),
+  requirements: text('requirements', { mode: 'json' }).notNull(),
+  durationDays: integer('duration_days').notNull(),
+  slotsAvailable: integer('slots_available').notNull(),
+  slotsFilled: integer('slots_filled').notNull().default(0),
+  status: text('status').notNull().default('active'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// Add sponsorship_applications table
+export const sponsorshipApplications = sqliteTable('sponsorship_applications', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  opportunityId: integer('opportunity_id').notNull().references(() => sponsorshipOpportunities.id),
+  influencerUserId: text('influencer_user_id').notNull().references(() => user.id),
+  pitch: text('pitch').notNull(),
+  expectedReach: integer('expected_reach').notNull(),
+  portfolioLinks: text('portfolio_links', { mode: 'json' }).notNull(),
+  status: text('status').notNull().default('pending'),
+  appliedAt: text('applied_at').notNull(),
+  reviewedAt: text('reviewed_at'),
+  completedAt: text('completed_at'),
+});
+
+// Add sponsorship_deals table
+export const sponsorshipDeals = sqliteTable('sponsorship_deals', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  applicationId: integer('application_id').notNull().references(() => sponsorshipApplications.id),
+  opportunityId: integer('opportunity_id').notNull().references(() => sponsorshipOpportunities.id),
+  brandUserId: text('brand_user_id').notNull().references(() => user.id),
+  influencerUserId: text('influencer_user_id').notNull().references(() => user.id),
+  agreedPayment: integer('agreed_payment').notNull(),
+  deliverables: text('deliverables', { mode: 'json' }).notNull(),
+  status: text('status').notNull().default('active'),
+  contentUrls: text('content_urls', { mode: 'json' }),
+  paymentReleasedAt: text('payment_released_at'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});

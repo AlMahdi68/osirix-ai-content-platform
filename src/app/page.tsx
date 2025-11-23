@@ -24,7 +24,8 @@ import {
   Target,
   CheckCircle2,
   Clock,
-  Wallet
+  Wallet,
+  Award
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "@/lib/auth-client";
@@ -73,6 +74,12 @@ export default function Home() {
               <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition hover:scale-105 gap-2">
                 <Wand2 className="h-4 w-4" />
                 Meet OZ
+              </Button>
+            </Link>
+            <Link href="/sponsorships">
+              <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition hover:scale-105 gap-2">
+                <Award className="h-4 w-4" />
+                Sponsorships
               </Button>
             </Link>
             <Link href="/plans">

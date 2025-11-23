@@ -25,7 +25,10 @@ import {
   LayoutDashboard,
   Sparkles,
   Target,
-  Megaphone
+  Megaphone,
+  BookOpen,
+  Rocket,
+  Zap
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -129,6 +132,114 @@ const ctaTemplates = [
   }
 ];
 
+const monetizationBlueprints = [
+  {
+    id: "influencer-starter",
+    title: "AI Influencer Starter Blueprint",
+    difficulty: "Beginner",
+    timeToProfit: "7-14 days",
+    potentialEarnings: "$500-2,000/month",
+    description: "Launch your AI social media influencer and start earning from day one",
+    steps: [
+      "Create AI character with unique personality (use Character Creator)",
+      "Generate 30 days of content using AI tools",
+      "Set up social media accounts (Instagram, TikTok, YouTube)",
+      "Schedule automated posting (3-5 posts per day)",
+      "Apply for brand sponsorships (minimum 1,000 followers)",
+      "Join affiliate programs and add links to bio",
+      "Engage with audience using AI responses",
+      "Track performance and optimize content"
+    ],
+    requiredTools: ["AI Character Creator", "Social Scheduler", "Logo Generator"],
+    keyMetrics: ["Follower Growth", "Engagement Rate", "Sponsorship Revenue"],
+    successStories: "Sarah made $1,200 in her first month with an AI fitness influencer"
+  },
+  {
+    id: "product-marketplace",
+    title: "Digital Product Empire Blueprint",
+    difficulty: "Intermediate",
+    timeToProfit: "3-7 days",
+    potentialEarnings: "$1,000-5,000/month",
+    description: "Build and sell AI-generated digital products at scale",
+    steps: [
+      "Identify profitable niches (voice packs, templates, avatars)",
+      "Generate 10-20 products using AI tools",
+      "Create professional preview images and demos",
+      "List products in marketplace with optimized descriptions",
+      "Set competitive pricing ($10-$200 per product)",
+      "Promote products on social media channels",
+      "Offer bundle deals to increase average order value",
+      "Reinvest profits into paid advertising"
+    ],
+    requiredTools: ["AI Product Creator", "Logo Generator", "Marketplace Access"],
+    keyMetrics: ["Product Sales", "Average Order Value", "Customer Reviews"],
+    successStories: "Mike's voice pack bundle generates $3,500+ monthly passive income"
+  },
+  {
+    id: "content-agency",
+    title: "AI Content Agency Blueprint",
+    difficulty: "Advanced",
+    timeToProfit: "14-30 days",
+    potentialEarnings: "$5,000-15,000/month",
+    description: "Start an agency offering AI-powered content creation services",
+    steps: [
+      "Define service packages (video creation, social media, logos)",
+      "Create portfolio with 10+ sample projects",
+      "Set up professional website/landing page",
+      "Price services competitively ($500-$2,000 per project)",
+      "Reach out to 50+ potential clients",
+      "Deliver first projects using Osirix tools",
+      "Collect testimonials and case studies",
+      "Scale with recurring monthly retainers"
+    ],
+    requiredTools: ["All AI Tools", "Social Scheduler", "Video Generator"],
+    keyMetrics: ["Client Acquisition Cost", "Monthly Recurring Revenue", "Client Retention"],
+    successStories: "Alex's agency now serves 12 clients with $8,000 MRR using only Osirix"
+  },
+  {
+    id: "sponsorship-income",
+    title: "Brand Sponsorship Mastery Blueprint",
+    difficulty: "Intermediate",
+    timeToProfit: "21-45 days",
+    potentialEarnings: "$2,000-10,000/month",
+    description: "Build a portfolio of brand deals and sponsored content",
+    steps: [
+      "Build audience to 10,000+ followers using AI content",
+      "Create media kit showcasing reach and engagement",
+      "Apply to 20+ sponsorship opportunities weekly",
+      "Negotiate rates ($500-$5,000 per campaign)",
+      "Deliver high-quality sponsored content",
+      "Maintain 4.8+ rating for repeat deals",
+      "Upsell brands on additional placements",
+      "Build long-term partnership relationships"
+    ],
+    requiredTools: ["AI Character Creator", "Video Generator", "Social Scheduler"],
+    keyMetrics: ["Active Sponsorships", "Average Deal Size", "Repeat Rate"],
+    successStories: "Emma secured 5 recurring brand deals worth $6,500/month combined"
+  },
+  {
+    id: "affiliate-mastery",
+    title: "Affiliate Marketing Powerhouse Blueprint",
+    difficulty: "Beginner",
+    timeToProfit: "7-21 days",
+    potentialEarnings: "$1,000-8,000/month",
+    description: "Master affiliate marketing with AI-generated content",
+    steps: [
+      "Join 10+ high-converting affiliate programs",
+      "Create AI influencer in your niche",
+      "Generate product review content (30+ pieces)",
+      "Add affiliate links to all content",
+      "Use AI to create compelling CTAs",
+      "A/B test different promotional approaches",
+      "Scale with paid traffic (ads)",
+      "Track conversions and optimize campaigns"
+    ],
+    requiredTools: ["AI Character Creator", "CTA Templates", "Social Scheduler"],
+    keyMetrics: ["Click-Through Rate", "Conversion Rate", "Commission Earned"],
+    successStories: "David earns $4,200/month promoting tech products with AI content"
+  }
+];
+
 export default function MonetizationPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
@@ -137,6 +248,7 @@ export default function MonetizationPage() {
   const [selectedTemplate, setSelectedTemplate] = useState(ctaTemplates[0]);
   const [affiliateLink, setAffiliateLink] = useState("");
   const [productName, setProductName] = useState("");
+  const [selectedBlueprint, setSelectedBlueprint] = useState(monetizationBlueprints[0]);
 
   useEffect(() => {
     if (!isPending && !session?.user) {
@@ -187,7 +299,7 @@ export default function MonetizationPage() {
               Monetization Tools
             </h1>
             <p className="text-muted-foreground text-lg">
-              Maximize your earnings with affiliate links and powerful CTAs
+              Maximize your earnings with affiliate links, CTAs, and proven blueprints
             </p>
           </div>
           <Button
@@ -200,12 +312,154 @@ export default function MonetizationPage() {
           </Button>
         </div>
 
-        <Tabs defaultValue="cta" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="blueprints" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="blueprints">Blueprints</TabsTrigger>
             <TabsTrigger value="cta">CTA Templates</TabsTrigger>
             <TabsTrigger value="affiliate">Affiliate Programs</TabsTrigger>
             <TabsTrigger value="generator">Content Generator</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="blueprints" className="space-y-6">
+            <Card className="p-6 border-primary/30 bg-gradient-to-br from-green-500/10 to-primary/5">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-semibold">Monetization Blueprints</h2>
+              </div>
+              <p className="text-muted-foreground mb-6">
+                Step-by-step strategies used by successful creators to earn $500-$15,000/month
+              </p>
+
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {monetizationBlueprints.map((blueprint) => (
+                  <Card 
+                    key={blueprint.id} 
+                    className="p-6 hover:border-primary/50 transition-all cursor-pointer group"
+                    onClick={() => setSelectedBlueprint(blueprint)}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                          {blueprint.title}
+                        </h3>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            blueprint.difficulty === "Beginner" ? "bg-green-500/20 text-green-400" :
+                            blueprint.difficulty === "Intermediate" ? "bg-yellow-500/20 text-yellow-400" :
+                            "bg-red-500/20 text-red-400"
+                          }`}>
+                            {blueprint.difficulty}
+                          </span>
+                          <span className="text-xs px-2 py-1 rounded bg-primary/20 text-primary">
+                            {blueprint.timeToProfit}
+                          </span>
+                        </div>
+                      </div>
+                      <Rocket className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                    </div>
+
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {blueprint.description}
+                    </p>
+
+                    <div className="mb-4 p-3 bg-green-500/10 rounded-lg">
+                      <div className="text-xs text-muted-foreground mb-1">Potential Earnings</div>
+                      <div className="text-lg font-bold text-green-400">
+                        {blueprint.potentialEarnings}
+                      </div>
+                    </div>
+
+                    <Button className="w-full" size="sm" variant="outline">
+                      <BookOpen className="mr-2 h-3 w-3" />
+                      View Full Blueprint
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </Card>
+
+            {/* Selected Blueprint Detail */}
+            {selectedBlueprint && (
+              <Card className="p-8 border-primary/30">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex-1">
+                    <h2 className="text-3xl font-bold mb-2">{selectedBlueprint.title}</h2>
+                    <p className="text-muted-foreground text-lg mb-4">{selectedBlueprint.description}</p>
+                    <div className="flex flex-wrap gap-3">
+                      <span className={`px-3 py-1.5 rounded-lg font-medium ${
+                        selectedBlueprint.difficulty === "Beginner" ? "bg-green-500/20 text-green-400" :
+                        selectedBlueprint.difficulty === "Intermediate" ? "bg-yellow-500/20 text-yellow-400" :
+                        "bg-red-500/20 text-red-400"
+                      }`}>
+                        {selectedBlueprint.difficulty} Level
+                      </span>
+                      <span className="px-3 py-1.5 rounded-lg bg-primary/20 text-primary font-medium">
+                        ⏰ {selectedBlueprint.timeToProfit}
+                      </span>
+                      <span className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 font-medium">
+                        💰 {selectedBlueprint.potentialEarnings}
+                      </span>
+                    </div>
+                  </div>
+                  <Zap className="h-12 w-12 text-primary" />
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <Target className="h-5 w-5 text-primary" />
+                      Step-by-Step Plan
+                    </h3>
+                    <div className="space-y-3">
+                      {selectedBlueprint.steps.map((step, idx) => (
+                        <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold">
+                            {idx + 1}
+                          </div>
+                          <span className="text-sm">{step}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-xl font-semibold mb-4">Required Tools</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedBlueprint.requiredTools.map((tool, idx) => (
+                          <span key={idx} className="px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm">
+                            {tool}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-semibold mb-4">Key Metrics to Track</h3>
+                      <div className="space-y-2">
+                        {selectedBlueprint.keyMetrics.map((metric, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-sm">
+                            <TrendingUp className="h-4 w-4 text-green-400" />
+                            <span>{metric}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <div className="text-sm text-muted-foreground mb-2">💡 Success Story</div>
+                      <p className="text-sm italic">&ldquo;{selectedBlueprint.successStories}&rdquo;</p>
+                    </div>
+
+                    <Button className="w-full" size="lg">
+                      <Rocket className="mr-2 h-4 w-4" />
+                      Start This Blueprint
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </TabsContent>
 
           <TabsContent value="cta" className="space-y-6">
             <Card className="p-6 border-primary/30">

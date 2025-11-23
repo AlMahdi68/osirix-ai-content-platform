@@ -32,9 +32,16 @@ import {
   Bot,
   Wand2,
   Crown,
+  Award,
+  Store,
+  Star,
+  Wallet,
+  DollarSign,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import PlanBadge from "@/components/PlanBadge";
+import { NotificationCenter } from "@/components/NotificationCenter";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -44,6 +51,8 @@ const navigation = [
   { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
   { name: "Social Media", href: "/social", icon: Calendar },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  { name: "Sponsorships", href: "/sponsorships", icon: Award },
+  { name: "Wallet", href: "/wallet", icon: Wallet },
 ];
 
 const aiNavigation = [
@@ -52,6 +61,13 @@ const aiNavigation = [
   { name: "Logo Generator", href: "/ai/logos", icon: Palette },
   { name: "Character Creator", href: "/ai/characters", icon: Users },
   { name: "Digital Marketer", href: "/ai/campaigns", icon: TrendingUp },
+];
+
+const monetizationNavigation = [
+  { name: "Monetization Tools", href: "/monetization", icon: DollarSign },
+  { name: "Content Previews", href: "/previews", icon: Eye },
+  { name: "E-commerce Hub", href: "/ecommerce", icon: Store },
+  { name: "Collaborations", href: "/collaborations", icon: Star },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -150,6 +166,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               );
             })}
           </div>
+
+          {/* Monetization Section */}
+          <div className="pt-4">
+            <div className="px-3 pb-2 flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-primary" />
+              <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+                Monetization
+              </span>
+            </div>
+            {monetizationNavigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link key={item.name} href={item.href}>
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={`w-full justify-start gap-2 ${isActive ? 'bg-primary/10 text-primary border border-primary/30' : 'hover:bg-primary/5 hover:text-primary'}`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                  </Button>
+                </Link>
+              );
+            })}
+          </div>
           
           {isAdmin && (
             <div className="pt-4">
@@ -172,10 +212,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Header */}
         <header className="flex h-16 items-center justify-between border-b border-primary/20 px-6 bg-card/30 backdrop-blur">
           <h1 className="text-xl font-semibold">
-            {[...navigation, ...aiNavigation].find((item) => item.href === pathname)?.name || "Dashboard"}
+            {[...navigation, ...aiNavigation, ...monetizationNavigation].find((item) => item.href === pathname)?.name || "Dashboard"}
           </h1>
 
           <div className="flex items-center gap-3">
+            <NotificationCenter />
             <PlanBadge />
             
             <DropdownMenu>

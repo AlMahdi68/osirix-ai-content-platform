@@ -216,6 +216,50 @@ export const verification = sqliteTable("verification", {
   ),
 });
 
+// Add wallets table
+export const wallets = sqliteTable('wallets', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  balance: integer('balance').notNull().default(0),
+  pendingBalance: integer('pending_balance').notNull().default(0),
+  totalEarnings: integer('total_earnings').notNull().default(0),
+  totalWithdrawn: integer('total_withdrawn').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// Add transactions table
+export const transactions = sqliteTable('transactions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  walletId: integer('wallet_id').notNull().references(() => wallets.id),
+  userId: text('user_id').notNull().references(() => user.id),
+  type: text('type').notNull(),
+  amount: integer('amount').notNull(),
+  status: text('status').notNull(),
+  sourceType: text('source_type').notNull(),
+  sourceId: integer('source_id'),
+  description: text('description').notNull(),
+  metadata: text('metadata', { mode: 'json' }),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// Add withdrawal_requests table
+export const withdrawalRequests = sqliteTable('withdrawal_requests', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id),
+  walletId: integer('wallet_id').notNull().references(() => wallets.id),
+  amount: integer('amount').notNull(),
+  method: text('method').notNull(),
+  paymentDetails: text('payment_details', { mode: 'json' }).notNull(),
+  status: text('status').notNull().default('pending'),
+  processedAt: text('processed_at'),
+  rejectionReason: text('rejection_reason'),
+  adminNotes: text('admin_notes'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
 // Add AI-powered feature tables
 
 // AI Products table

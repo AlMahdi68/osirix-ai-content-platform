@@ -23,13 +23,16 @@ import {
   DollarSign,
   Target,
   CheckCircle2,
-  Clock
+  Clock,
+  Wallet
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useSession } from "@/lib/auth-client";
 
 export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
+  const { data: session, isPending } = useSession();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -77,16 +80,34 @@ export default function Home() {
                 Pricing
               </Button>
             </Link>
-            <Link href="/login">
-              <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition hover:scale-105">
-                Login
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gold-glow smooth-transition hover:scale-110 hover:rotate-1">
-                Start Making Money
-              </Button>
-            </Link>
+            {!isPending && session?.user ? (
+              <>
+                <Link href="/wallet">
+                  <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition hover:scale-105 gap-2">
+                    <Wallet className="h-4 w-4" />
+                    Wallet
+                  </Button>
+                </Link>
+                <Link href="/dashboard">
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gold-glow smooth-transition hover:scale-110 hover:rotate-1">
+                    Dashboard
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="text-foreground/80 hover:text-primary smooth-transition hover:scale-105">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gold-glow smooth-transition hover:scale-110 hover:rotate-1">
+                    Start Making Money
+                  </Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -440,6 +461,17 @@ export default function Home() {
           <div className="flex items-center gap-3 group">
             <Crown className="h-6 w-6 text-primary group-hover:rotate-12 transition-transform" />
             <span className="font-semibold text-lg">Osirix</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              About
+            </Link>
+            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              Terms
+            </Link>
           </div>
           <p className="text-sm text-muted-foreground">
             © 2024 Osirix. Empowering creators to make money with AI.

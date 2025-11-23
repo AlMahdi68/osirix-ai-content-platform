@@ -63,7 +63,7 @@ export default function SponsorshipsPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("All");
-  const [budgetRange, setBudgetRange] = useState("");
+  const [budgetRange, setBudgetRange] = useState("all");
 
   useEffect(() => {
     fetchOpportunities();
@@ -74,7 +74,7 @@ export default function SponsorshipsPage() {
       setLoading(true);
       const params = new URLSearchParams();
       if (category !== "All") params.append("category", category);
-      if (budgetRange) {
+      if (budgetRange && budgetRange !== "all") {
         const [min, max] = budgetRange.split("-");
         if (min) params.append("budgetMin", min);
         if (max) params.append("budgetMax", max);
@@ -175,7 +175,7 @@ export default function SponsorshipsPage() {
                 <SelectValue placeholder="Select budget" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Budgets</SelectItem>
+                <SelectItem value="all">All Budgets</SelectItem>
                 <SelectItem value="0-50000">$0 - $500</SelectItem>
                 <SelectItem value="50000-100000">$500 - $1,000</SelectItem>
                 <SelectItem value="100000-200000">$1,000 - $2,000</SelectItem>

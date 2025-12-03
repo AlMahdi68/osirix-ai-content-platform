@@ -1,46 +1,203 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import {
   Wand2,
   Sparkles,
   TrendingUp,
   Zap,
-  Users,
-  Video,
-  Mic,
-  Package,
-  Palette,
-  Bot,
-  Calendar,
   DollarSign,
-  Share2,
-  Target,
-  Lightbulb,
+  Bot,
   CheckCircle,
-  ArrowRight,
-  Play,
-  ShoppingBag,
-  BarChart3,
+  XCircle,
+  Clock,
   Crown,
-  Link as LinkIcon,
-  MessageSquare,
-  Instagram,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Youtube,
-  XCircle
+  Loader2,
+  Activity,
+  Target,
+  Rocket,
+  BarChart3,
+  ShoppingBag,
+  Video,
+  Palette
 } from "lucide-react";
-import Link from "next/link";
+import { toast } from "sonner";
+
+interface OZStatus {
+  isRunning: boolean;
+  lastActivity: string | null;
+  activitiesLast24h: number;
+  successRate: number;
+  revenueGenerated: number;
+  tasksCompleted: number;
+  strategy: string | null;
+  startedAt: string | null;
+}
+
+interface OZActivity {
+  id: number;
+  activityType: string;
+  description: string;
+  relatedResourceType: string | null;
+  relatedResourceId: number | null;
+  result: string;
+  metadata: Record<string, any> | null;
+  createdAt: string;
+}
 
 export default function OZGuidePage() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+  const [status, setStatus] = useState<OZStatus | null>(null);
+  const [activities, setActivities] = useState<OZActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
+  const [strategy, setStrategy] = useState<string>("full_automation");
+  const [targetRevenue, setTargetRevenue] = useState<number>(1000);
+
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      router.push("/login");
+    }
+  }, [session, isPending, router]);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchStatus();
+      fetchActivities();
+      
+      // Poll status every 10 seconds
+      const interval = setInterval(() => {
+        fetchStatus();
+        fetchActivities();
+      }, 10000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [session]);
+
+  const fetchStatus = async () => {
+    try {
+      const token = localStorage.getItem("bearer_token");
+      const response = await fetch("/api/oz/status", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStatus(data);
+      }
+    } catch (error) {
+      console.error("Error fetching status:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchActivities = async () => {
+    try {
+      const token = localStorage.getItem("bearer_token");
+      const response = await fetch("/api/oz/activities?limit=20", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setActivities(data.activities || []);
+      }
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+    }
+  };
+
+  const handleStart = async () => {
+    setIsStarting(true);
+    try {
+      const token = localStorage.getItem("bearer_token");
+      const response = await fetch("/api/oz/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          strategy,
+          targetRevenue,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("🧙‍♂️ OZ Agent activated! Starting money-making workflows...");
+        fetchStatus();
+        fetchActivities();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to start OZ Agent");
+      }
+    } catch (error) {
+      console.error("Error starting OZ:", error);
+      toast.error("Failed to start OZ Agent");
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const handleStop = async () => {
+    setIsStopping(true);
+    try {
+      const token = localStorage.getItem("bearer_token");
+      const response = await fetch("/api/oz/stop", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success("OZ Agent stopped successfully");
+        fetchStatus();
+        fetchActivities();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to stop OZ Agent");
+      }
+    } catch (error) {
+      console.error("Error stopping OZ:", error);
+      toast.error("Failed to stop OZ Agent");
+    } finally {
+      setIsStopping(false);
+    }
+  };
+
+  if (isPending || isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -58,1149 +215,344 @@ export default function OZGuidePage() {
               <Crown className="h-12 w-12 text-primary gold-glow" />
             </div>
             <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent animated-gradient">
-              Meet OZ - Your AI Money-Making Guide
+              OZ - Autonomous Money-Making AI
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              The Wizard of Osirix. I'll show you exactly how to turn AI into automatic income streams. 
-              Let's unlock your potential and build wealth while you sleep! 💰
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-6">
+              The Wizard of Osirix. I don't just guide you - I execute workflows that generate income automatically. 
+              Set your goals, and watch me work! 🧙‍♂️✨
             </p>
             <div className="flex items-center justify-center gap-4">
               <Badge className="text-lg px-6 py-2 bg-primary/20 border-primary/30">
-                <Sparkles className="h-4 w-4 mr-2" />
-                AI-Powered Guidance
+                <Bot className="h-4 w-4 mr-2" />
+                Autonomous Execution
               </Badge>
               <Badge className="text-lg px-6 py-2 bg-primary/20 border-primary/30">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Maximize Earnings
+                <DollarSign className="h-4 w-4 mr-2" />
+                Revenue Generation
               </Badge>
             </div>
           </CardContent>
         </Card>
 
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 h-auto p-1">
-            <TabsTrigger value="overview" className="gap-2 py-3">
-              <Sparkles className="h-4 w-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="money" className="gap-2 py-3">
-              <DollarSign className="h-4 w-4" />
-              Make Money
-            </TabsTrigger>
-            <TabsTrigger value="social" className="gap-2 py-3">
-              <Share2 className="h-4 w-4" />
-              Social Media
-            </TabsTrigger>
-            <TabsTrigger value="automation" className="gap-2 py-3">
-              <Bot className="h-4 w-4" />
-              Automation
-            </TabsTrigger>
-            <TabsTrigger value="strategy" className="gap-2 py-3">
-              <Target className="h-4 w-4" />
-              Strategy
-            </TabsTrigger>
-            <TabsTrigger value="tips" className="gap-2 py-3">
-              <Lightbulb className="h-4 w-4" />
-              Pro Tips
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Wand2 className="h-6 w-6 text-primary" />
-                  Welcome to Your AI Empire
-                </CardTitle>
-                <CardDescription>
-                  Osirix is your autonomous AI workforce that creates content, builds products, and makes money 24/7
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="prose prose-invert max-w-none">
-                  <p className="text-lg">
-                    Think of Osirix as your personal AI army. Each tool is a specialized agent working tirelessly to generate income while you focus on strategy or simply relax. Here's what you have at your command:
-                  </p>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  <ToolCard
-                    icon={<Bot className="h-8 w-8 text-primary" />}
-                    title="AI Manager Agent"
-                    description="Your autonomous orchestrator that manages all tools and maximizes profits"
-                    earnings="$500-5000/month"
-                    link="/ai/manager"
-                  />
-                  <ToolCard
-                    icon={<Package className="h-8 w-8 text-primary" />}
-                    title="Product Creator"
-                    description="Generate digital products to sell on the marketplace"
-                    earnings="$200-2000/product"
-                    link="/ai/products"
-                  />
-                  <ToolCard
-                    icon={<Palette className="h-8 w-8 text-primary" />}
-                    title="Logo Generator"
-                    description="Create professional logos clients will pay for"
-                    earnings="$50-500/logo"
-                    link="/ai/logos"
-                  />
-                  <ToolCard
-                    icon={<Users className="h-8 w-8 text-primary" />}
-                    title="Character Creator"
-                    description="Design AI avatars for videos and content"
-                    earnings="$100-1000/character"
-                    link="/ai/characters"
-                  />
-                  <ToolCard
-                    icon={<MessageSquare className="h-8 w-8 text-primary" />}
-                    title="Digital Marketer"
-                    description="Run automated campaigns across all platforms"
-                    earnings="$300-3000/month"
-                    link="/ai/campaigns"
-                  />
-                  <ToolCard
-                    icon={<Video className="h-8 w-8 text-primary" />}
-                    title="Video Generator"
-                    description="Create viral videos with lip-sync technology"
-                    earnings="$100-1000/video"
-                    link="/jobs"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-6 w-6 text-green-500" />
-                  Your Earning Potential
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="text-center p-6 bg-background/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-2">Beginner</p>
-                    <p className="text-3xl font-bold text-green-500">$500-2K</p>
-                    <p className="text-xs text-muted-foreground mt-2">Per month</p>
-                  </div>
-                  <div className="text-center p-6 bg-background/50 rounded-lg border-2 border-primary/30">
-                    <p className="text-sm text-muted-foreground mb-2">Intermediate</p>
-                    <p className="text-3xl font-bold text-primary">$2K-10K</p>
-                    <p className="text-xs text-muted-foreground mt-2">Per month</p>
-                  </div>
-                  <div className="text-center p-6 bg-background/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-2">Advanced</p>
-                    <p className="text-3xl font-bold text-yellow-500">$10K+</p>
-                    <p className="text-xs text-muted-foreground mt-2">Per month</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Make Money Tab */}
-          <TabsContent value="money" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <DollarSign className="h-6 w-6 text-green-500" />
-                  7 Ways to Make Money with Osirix
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <MoneyStrategyCard
-                  number="1"
-                  title="Sell Digital Products on Marketplace"
-                  description="Create products with AI Product Creator and sell them on our marketplace"
-                  steps={[
-                    "Use AI Product Creator to generate product ideas",
-                    "Create compelling descriptions and pricing",
-                    "List on Osirix Marketplace",
-                    "Earn passive income from every sale"
-                  ]}
-                  potential="$200-2000 per product"
-                  difficulty="Easy"
-                  timeToProfit="1-7 days"
+        {/* Control Panel */}
+        <Card className="p-8 border-primary/30">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                <Rocket className="h-6 w-6 text-primary" />
+                OZ Agent Control Center
+              </h2>
+              <p className="text-muted-foreground">
+                {status?.isRunning
+                  ? "🧙‍♂️ OZ is actively working on money-making workflows"
+                  : "Start OZ to automate your income generation"}
+              </p>
+            </div>
+            <div
+              className={`px-4 py-2 rounded-lg ${
+                status?.isRunning
+                  ? "bg-primary/20 text-primary pulse-glow"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-3 h-3 rounded-full ${
+                    status?.isRunning ? "bg-primary animate-pulse" : "bg-muted-foreground"
+                  }`}
                 />
+                <span className="font-medium">
+                  {status?.isRunning ? "Active" : "Inactive"}
+                </span>
+              </div>
+            </div>
+          </div>
 
-                <MoneyStrategyCard
-                  number="2"
-                  title="Offer Logo Design Services"
-                  description="Generate professional logos for clients using AI Logo Generator"
-                  steps={[
-                    "Browse logo templates and styles",
-                    "Generate custom logos in seconds",
-                    "Sell on freelance platforms (Fiverr, Upwork)",
-                    "Deliver instantly, keep 100% profit"
-                  ]}
-                  potential="$50-500 per logo"
-                  difficulty="Easy"
-                  timeToProfit="Same day"
-                />
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="space-y-2">
+              <Label htmlFor="strategy">Money-Making Strategy</Label>
+              <Select value={strategy} onValueChange={setStrategy} disabled={status?.isRunning}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="quick_wins">
+                    🎯 Quick Wins - Fast marketplace sales
+                  </SelectItem>
+                  <SelectItem value="content_empire">
+                    📹 Content Empire - Viral videos & social growth
+                  </SelectItem>
+                  <SelectItem value="marketplace_seller">
+                    🛍️ Marketplace Seller - Product creation & sales
+                  </SelectItem>
+                  <SelectItem value="social_growth">
+                    📱 Social Growth - Audience building & engagement
+                  </SelectItem>
+                  <SelectItem value="full_automation">
+                    🚀 Full Automation - All strategies combined
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <MoneyStrategyCard
-                  number="3"
-                  title="Create & Monetize Video Content"
-                  description="Generate viral videos with characters and publish to social media"
-                  steps={[
-                    "Create AI characters with unique personalities",
-                    "Generate videos with lip-sync technology",
-                    "Post to YouTube, TikTok, Instagram",
-                    "Earn from ads, sponsorships, and affiliate links"
-                  ]}
-                  potential="$100-10K+ per month"
-                  difficulty="Medium"
-                  timeToProfit="2-4 weeks"
-                />
+            <div className="space-y-2">
+              <Label htmlFor="revenue">Monthly Revenue Target ($)</Label>
+              <Input
+                id="revenue"
+                type="number"
+                value={targetRevenue}
+                onChange={(e) => setTargetRevenue(parseInt(e.target.value) || 1000)}
+                disabled={status?.isRunning}
+                min={100}
+                max={100000}
+                step={100}
+              />
+            </div>
+          </div>
 
-                <MoneyStrategyCard
-                  number="4"
-                  title="Run Social Media Management Agency"
-                  description="Manage multiple client accounts with AI Digital Marketer"
-                  steps={[
-                    "Connect client social media accounts",
-                    "Create campaigns with AI Digital Marketer",
-                    "Schedule content automatically",
-                    "Charge monthly retainer fees"
-                  ]}
-                  potential="$1000-10K+ per month"
-                  difficulty="Medium"
-                  timeToProfit="1-2 months"
-                />
+          <div className="flex gap-4">
+            {!status?.isRunning ? (
+              <Button
+                onClick={handleStart}
+                disabled={isStarting}
+                size="lg"
+                className="bg-primary hover:bg-primary/90 gold-glow"
+              >
+                {isStarting ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Activating OZ...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="mr-2 h-5 w-5" />
+                    Start OZ Agent
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleStop}
+                disabled={isStopping}
+                variant="destructive"
+                size="lg"
+              >
+                {isStopping ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Stopping...
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="mr-2 h-5 w-5" />
+                    Stop OZ Agent
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </Card>
 
-                <MoneyStrategyCard
-                  number="5"
-                  title="Sell AI Character Licenses"
-                  description="Create unique AI characters and license them to content creators"
-                  steps={[
-                    "Design characters with AI Character Creator",
-                    "Create voice packs and avatar bundles",
-                    "List on marketplace with licensing terms",
-                    "Earn recurring revenue from licenses"
-                  ]}
-                  potential="$100-1000 per character"
-                  difficulty="Easy"
-                  timeToProfit="3-7 days"
-                />
+        {/* Stats */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="p-6 border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Revenue Generated</p>
+                <p className="text-3xl font-bold text-primary">${status?.revenueGenerated || 0}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/10">
+                <DollarSign className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+          </Card>
 
-                <MoneyStrategyCard
-                  number="6"
-                  title="Automated Content Empire"
-                  description="Let AI Manager Agent run everything on autopilot"
-                  steps={[
-                    "Set up AI Manager Agent with your goals",
-                    "Connect all social media accounts",
-                    "Configure automation rules",
-                    "Monitor earnings dashboard daily"
-                  ]}
-                  potential="$500-5000+ per month"
-                  difficulty="Hard"
-                  timeToProfit="1-3 months"
-                />
+          <Card className="p-6 border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Tasks Completed</p>
+                <p className="text-3xl font-bold">{status?.tasksCompleted || 0}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/10">
+                <Target className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+          </Card>
 
-                <MoneyStrategyCard
-                  number="7"
-                  title="Affiliate Marketing with AI Content"
-                  description="Create product review videos and earn commissions"
-                  steps={[
-                    "Choose affiliate programs (Amazon, ClickBank)",
-                    "Generate product review videos with AI",
-                    "Include affiliate links in descriptions",
-                    "Post across all platforms automatically"
-                  ]}
-                  potential="$200-5000+ per month"
-                  difficulty="Medium"
-                  timeToProfit="2-6 weeks"
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <Card className="p-6 border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Success Rate</p>
+                <p className="text-3xl font-bold">{status?.successRate || 0}%</p>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/10">
+                <TrendingUp className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+          </Card>
 
-          {/* Social Media Tab */}
-          <TabsContent value="social" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Share2 className="h-6 w-6 text-primary" />
-                  Connecting Your Social Media Accounts
-                </CardTitle>
-                <CardDescription>
-                  Link your accounts once, and Osirix handles the rest automatically
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
-                  <div className="flex items-start gap-3">
-                    <Lightbulb className="h-6 w-6 text-yellow-500 flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-semibold mb-2">Why Connect Social Media?</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Once connected, Osirix AI can automatically create, schedule, and publish content to all your platforms. 
-                        You'll reach millions while sleeping! 🌙
-                      </p>
-                    </div>
+          <Card className="p-6 border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Activities (24h)</p>
+                <p className="text-3xl font-bold">{status?.activitiesLast24h || 0}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/10">
+                <Activity className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Current Strategy */}
+        {status?.isRunning && status.strategy && (
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" />
+                Active Strategy: {status.strategy.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </CardTitle>
+              <CardDescription>
+                Running since {status.startedAt ? new Date(status.startedAt).toLocaleString() : 'N/A'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="flex items-center gap-3 p-4 bg-background/50 rounded-lg">
+                  <ShoppingBag className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Products</p>
+                    <p className="font-semibold">Creating & Listing</p>
                   </div>
                 </div>
-
-                <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-green-500">
-                      <DollarSign className="h-5 w-5" />
-                      How Social Media Makes You Money
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-medium">Ad Revenue & Monetization</p>
-                          <p className="text-sm text-muted-foreground">YouTube videos earn $3-10 per 1000 views. Post 10 videos/week = $500-3000/month passive income</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-medium">Affiliate Marketing</p>
-                          <p className="text-sm text-muted-foreground">Include affiliate links in posts. 2% conversion on 10K followers = $200-500/month per product</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-medium">Brand Partnerships</p>
-                          <p className="text-sm text-muted-foreground">Brands pay $100-1000 per sponsored post depending on engagement. 4 posts/month = $400-4000</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-medium">Product Promotion</p>
-                          <p className="text-sm text-muted-foreground">Drive traffic to your marketplace products. 1% conversion on 5K visitors = 50 sales/month</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-medium">Lead Generation</p>
-                          <p className="text-sm text-muted-foreground">B2B leads via LinkedIn worth $50-200 each. 10 qualified leads/month = $500-2000</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <SocialPlatformGuide
-                  icon={<Youtube className="h-8 w-8" />}
-                  platform="YouTube"
-                  color="from-red-500/20 to-rose-500/20 border-red-500/30"
-                  steps={[
-                    "Navigate to Settings → Social Media in Osirix",
-                    "Click 'Connect YouTube' button",
-                    "Sign in with your Google account",
-                    "Grant permissions: Upload videos, Manage channel",
-                    "Osirix will auto-upload videos with titles, descriptions, and tags"
-                  ]}
-                  benefits={[
-                    "Auto-upload lip-sync videos with optimized metadata",
-                    "Schedule uploads for peak viewing times",
-                    "Auto-generate SEO-friendly titles and descriptions",
-                    "Track views, watch time, and revenue"
-                  ]}
-                  moneyPotential="$100-10K+/month from ads"
-                  howToEarn="Enable monetization in YouTube Studio. Post 3-5 videos weekly. Target 100K+ views/month for $300-1000 ad revenue. Add affiliate links in descriptions for extra income."
-                />
-
-                <SocialPlatformGuide
-                  icon={<Instagram className="h-8 w-8" />}
-                  platform="Instagram"
-                  color="from-pink-500/20 to-purple-500/20 border-pink-500/30"
-                  steps={[
-                    "Go to Settings → Social Media in Osirix",
-                    "Click 'Connect Instagram' button",
-                    "Log in with Instagram credentials (Business account required)",
-                    "Authorize Osirix to post on your behalf",
-                    "AI will create Reels, Stories, and Posts automatically"
-                  ]}
-                  benefits={[
-                    "Auto-post Reels and Stories with trending audio",
-                    "Hashtag optimization for maximum reach",
-                    "Best time posting based on audience analytics",
-                    "Engagement tracking and growth metrics"
-                  ]}
-                  moneyPotential="$500-5K/month from brand deals"
-                  howToEarn="Reach 10K+ followers for swipe-up links. Partner with brands for sponsored posts ($100-1000 each). Promote affiliate products in bio link. Use Instagram Shopping for direct sales."
-                />
-
-                <SocialPlatformGuide
-                  icon={<Twitter className="h-8 w-8" />}
-                  platform="Twitter / X"
-                  color="from-blue-500/20 to-cyan-500/20 border-blue-500/30"
-                  steps={[
-                    "Go to Settings → Social Media",
-                    "Click 'Connect Twitter' button",
-                    "Sign in to your X account",
-                    "Authorize API access for posting",
-                    "Osirix will tweet content automatically with optimal timing"
-                  ]}
-                  benefits={[
-                    "Auto-tweet campaigns with trending hashtags",
-                    "Thread generation for complex topics",
-                    "Engagement tracking and reply management",
-                    "Viral content analysis and optimization"
-                  ]}
-                  moneyPotential="$200-3K/month from engagement"
-                  howToEarn="Join Twitter Blue for monetization. Earn from impressions ($0.005/1000 views). Promote affiliate products in tweets. Build audience for newsletter signups. Offer paid consulting."
-                />
-
-                <SocialPlatformGuide
-                  icon={<Facebook className="h-8 w-8" />}
-                  platform="Facebook"
-                  color="from-blue-600/20 to-indigo-500/20 border-blue-600/30"
-                  steps={[
-                    "Go to Settings → Social Media",
-                    "Click 'Connect Facebook' button",
-                    "Log in to Facebook",
-                    "Grant page management permissions",
-                    "Select which page Osirix should manage",
-                    "AI posts to your page automatically"
-                  ]}
-                  benefits={[
-                    "Auto-post to pages and groups",
-                    "Audience targeting for better reach",
-                    "Engagement metrics and insights",
-                    "Ad campaign automation integration"
-                  ]}
-                  moneyPotential="$300-4K/month from page monetization"
-                  howToEarn="Enable in-stream ads on videos. Join Facebook Ad Breaks for revenue share. Sell products via Facebook Shop. Run targeted ads to your marketplace. Build community for paid membership."
-                />
-
-                <SocialPlatformGuide
-                  icon={<Linkedin className="h-8 w-8" />}
-                  platform="LinkedIn"
-                  color="from-blue-700/20 to-blue-500/20 border-blue-700/30"
-                  steps={[
-                    "Go to Settings → Social Media",
-                    "Click 'Connect LinkedIn' button",
-                    "Sign in with LinkedIn",
-                    "Authorize access to post on your behalf",
-                    "AI creates professional content automatically"
-                  ]}
-                  benefits={[
-                    "Professional content creation for B2B audience",
-                    "Network growth automation",
-                    "Lead generation and nurturing",
-                    "Thought leadership positioning"
-                  ]}
-                  moneyPotential="$500-10K/month from B2B leads"
-                  howToEarn="Generate consulting leads ($1000-10K/project). Offer B2B services to connections. Partner with companies for sponsored content. Build email list for course sales. Recruit for affiliate programs."
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-6 w-6 text-primary" />
-                  Quick Start: Connect All Platforms in 10 Minutes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ol className="space-y-4">
-                  {[
-                    "Navigate to Settings → Social Media OR click the Social Media tab in dashboard",
-                    "Click 'Connected Accounts' tab to view all platforms",
-                    "Click 'Connect' button for each platform you want to use",
-                    "Follow the OAuth prompts for each platform (sign in and authorize)",
-                    "Return to Osirix - you'll see 'Connected' status with green checkmark",
-                    "Go to 'Posts & Schedule' tab and create your first post!",
-                    "Enable AI Manager Agent for full automation across all platforms 🚀"
-                  ].map((step, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold flex-shrink-0">
-                        {idx + 1}
-                      </div>
-                      <p className="pt-1">{step}</p>
-                    </li>
-                  ))}
-                </ol>
-                <div className="mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                  <p className="text-sm font-medium text-green-500 mb-2">💡 Pro Tip: Start with 2-3 platforms</p>
-                  <p className="text-sm text-muted-foreground">
-                    Connect YouTube + Instagram first for maximum reach and monetization potential. 
-                    Add LinkedIn if you're targeting B2B. Add Twitter for viral potential.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5 text-purple-500" />
-                  What Happens After Connecting?
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 font-bold flex-shrink-0">
-                      1
-                    </div>
-                    <div>
-                      <p className="font-medium">Immediate Access to Posting</p>
-                      <p className="text-sm text-muted-foreground">Schedule posts manually or use AI to generate content automatically</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 font-bold flex-shrink-0">
-                      2
-                    </div>
-                    <div>
-                      <p className="font-medium">AI Manager Takes Over</p>
-                      <p className="text-sm text-muted-foreground">Enable AI Manager in dashboard - it creates, schedules, and publishes content 24/7</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 font-bold flex-shrink-0">
-                      3
-                    </div>
-                    <div>
-                      <p className="font-medium">Analytics & Optimization</p>
-                      <p className="text-sm text-muted-foreground">Track impressions, engagement, clicks - AI adjusts strategy for maximum growth</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 font-bold flex-shrink-0">
-                      4
-                    </div>
-                    <div>
-                      <p className="font-medium">Money Starts Flowing</p>
-                      <p className="text-sm text-muted-foreground">Within 2-4 weeks: Ad revenue, affiliate sales, brand partnerships, product sales</p>
-                    </div>
+                <div className="flex items-center gap-3 p-4 bg-background/50 rounded-lg">
+                  <Video className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Content</p>
+                    <p className="font-semibold">Generating Videos</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Automation Tab */}
-          <TabsContent value="automation" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Bot className="h-6 w-6 text-primary" />
-                  How Osirix Makes Money for You Automatically
-                </CardTitle>
-                <CardDescription>
-                  Set it once, earn forever. Here's exactly how the magic happens.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                <AutomationFlow />
-
-                <div className="grid gap-6 md:grid-cols-2">
-                  <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/30">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5 text-blue-500" />
-                        Content Scheduling
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      <p>AI Manager analyzes your audience and schedules posts at optimal times:</p>
-                      <ul className="space-y-2">
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                          <span>Analyzes engagement patterns</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                          <span>Posts when your audience is most active</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                          <span>Maintains consistent posting frequency</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                          <span>Adjusts strategy based on performance</span>
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Video className="h-5 w-5 text-purple-500" />
-                        Video Generation
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      <p>Automatically creates viral video content:</p>
-                      <ul className="space-y-2">
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                          <span>Generates scripts from trending topics</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                          <span>Creates voiceovers with TTS</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                          <span>Adds lip-sync to avatars</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                          <span>Publishes across all platforms</span>
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <ShoppingBag className="h-5 w-5 text-green-500" />
-                        Product Creation
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      <p>Builds and lists products for passive income:</p>
-                      <ul className="space-y-2">
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Identifies profitable niches</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Generates product concepts</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Creates marketing materials</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Lists on marketplace automatically</span>
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/30">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5 text-yellow-500" />
-                        Performance Optimization
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      <p>Continuously improves your strategy:</p>
-                      <ul className="space-y-2">
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                          <span>Tracks engagement metrics</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                          <span>A/B tests content variations</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                          <span>Identifies winning formulas</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                          <span>Scales what works best</span>
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
+                <div className="flex items-center gap-3 p-4 bg-background/50 rounded-lg">
+                  <Palette className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Designs</p>
+                    <p className="font-semibold">Making Logos</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Strategy Tab */}
-          <TabsContent value="strategy" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Target className="h-6 w-6 text-primary" />
-                  Personalized Money-Making Recommendations
-                </CardTitle>
-                <CardDescription>
-                  Based on your setup and goals, here's your optimal path to profits
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <RecommendationCard
-                  title="🚀 Quick Wins (Start Today)"
-                  recommendations={[
-                    {
-                      action: "Create 3 logos with AI Logo Generator",
-                      why: "Fastest way to make your first $100-300",
-                      howTo: "Use templates, list on Fiverr/marketplace",
-                      timeframe: "Today"
-                    },
-                    {
-                      action: "Generate 1 digital product",
-                      why: "Set up passive income stream",
-                      howTo: "Use AI Product Creator → List on marketplace",
-                      timeframe: "1-2 days"
-                    },
-                    {
-                      action: "Connect YouTube account",
-                      why: "Start building long-term revenue",
-                      howTo: "Settings → Social Media → Connect YouTube",
-                      timeframe: "5 minutes"
-                    }
-                  ]}
-                />
-
-                <RecommendationCard
-                  title="📈 Medium-Term Growth (This Month)"
-                  recommendations={[
-                    {
-                      action: "Create 2-3 AI characters",
-                      why: "Build your unique brand identity",
-                      howTo: "AI Character Creator → Use in videos",
-                      timeframe: "1 week"
-                    },
-                    {
-                      action: "Launch first marketing campaign",
-                      why: "Automate content across platforms",
-                      howTo: "AI Digital Marketer → Connect socials → Schedule",
-                      timeframe: "2 weeks"
-                    },
-                    {
-                      action: "Create 10 videos with lip-sync",
-                      why: "Build library of viral content",
-                      howTo: "Character + TTS + Video generator",
-                      timeframe: "3 weeks"
-                    }
-                  ]}
-                />
-
-                <RecommendationCard
-                  title="🏆 Long-Term Empire (Next 3 Months)"
-                  recommendations={[
-                    {
-                      action: "Enable AI Manager Agent",
-                      why: "Fully autonomous income system",
-                      howTo: "AI Manager → Set goals → Enable automation",
-                      timeframe: "Month 1"
-                    },
-                    {
-                      action: "Build product suite (5-10 products)",
-                      why: "Multiple passive income streams",
-                      howTo: "Consistent product creation + marketing",
-                      timeframe: "Month 2"
-                    },
-                    {
-                      action: "Scale to 100+ posts per month",
-                      why: "Maximum reach and visibility",
-                      howTo: "AI automation + social scheduling",
-                      timeframe: "Month 3"
-                    }
-                  ]}
-                />
-
-                <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Crown className="h-5 w-5 text-primary" />
-                      Your Personalized 90-Day Action Plan
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary text-sm">1</span>
-                          Days 1-30: Foundation ($500-2000)
-                        </h4>
-                        <ul className="ml-10 space-y-2 text-sm text-muted-foreground">
-                          <li>• Week 1: Create 5 products, 5 logos, connect all socials</li>
-                          <li>• Week 2: Generate 10 videos, start first campaign</li>
-                          <li>• Week 3: Create 3 characters, build content library</li>
-                          <li>• Week 4: Optimize based on analytics, double down on winners</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary text-sm">2</span>
-                          Days 31-60: Acceleration ($2000-5000)
-                        </h4>
-                        <ul className="ml-10 space-y-2 text-sm text-muted-foreground">
-                          <li>• Enable AI Manager Agent for full automation</li>
-                          <li>• Launch 3 major campaigns across all platforms</li>
-                          <li>• Build product suite with 15+ offerings</li>
-                          <li>• Start affiliate marketing with AI-generated reviews</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary text-sm">3</span>
-                          Days 61-90: Domination ($5000-10K+)
-                        </h4>
-                        <ul className="ml-10 space-y-2 text-sm text-muted-foreground">
-                          <li>• Scale to 200+ posts per month automatically</li>
-                          <li>• Launch social media management agency</li>
-                          <li>• Create premium character license packages</li>
-                          <li>• Expand to YouTube monetization and sponsorships</li>
-                        </ul>
+        {/* Activity Log */}
+        <Card className="p-6 border-border/50">
+          <CardHeader className="px-0 pt-0">
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              OZ Workflow Activity Log
+            </CardTitle>
+            <CardDescription>
+              Real-time execution of money-making workflows
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-0 pb-0">
+            {activities.length === 0 ? (
+              <div className="text-center py-12">
+                <Wand2 className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <p className="text-muted-foreground text-lg mb-2">No activities yet</p>
+                <p className="text-sm text-muted-foreground">
+                  Start OZ Agent to begin executing money-making workflows
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {activities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-primary/30 transition-all hover:bg-card/50"
+                  >
+                    <div className="mt-1">
+                      {activity.result === "success" ? (
+                        <CheckCircle className="h-5 w-5 text-primary" />
+                      ) : activity.result === "failed" ? (
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      ) : (
+                        <Clock className="h-5 w-5 text-yellow-500" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium mb-1">{activity.description}</p>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="capitalize">{activity.activityType.replace(/_/g, " ")}</span>
+                        <span>•</span>
+                        <span>{new Date(activity.createdAt).toLocaleString()}</span>
+                        {activity.metadata?.revenue && (
+                          <>
+                            <span>•</span>
+                            <span className="text-primary font-medium">
+                              +${activity.metadata.revenue}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    <Badge
+                      variant={activity.result === "success" ? "default" : "outline"}
+                      className={
+                        activity.result === "success"
+                          ? "bg-primary/20 text-primary border-primary/30"
+                          : activity.result === "failed"
+                          ? "bg-destructive/20 text-destructive border-destructive/30"
+                          : "bg-yellow-500/20 text-yellow-500 border-yellow-500/30"
+                      }
+                    >
+                      {activity.result}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Pro Tips Tab */}
-          <TabsContent value="tips" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Lightbulb className="h-6 w-6 text-yellow-500" />
-                  Pro Tips from Top Earners
-                </CardTitle>
-                <CardDescription>
-                  Insider secrets to maximize your Osirix earnings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <ProTipCard
-                  category="Content Strategy"
-                  tips={[
-                    "Post at 7am, 12pm, and 7pm - these are peak engagement times",
-                    "Use trending topics from AI Manager's suggestions - ride the viral wave",
-                    "Create series of 10+ videos on one topic - algorithm loves consistency",
-                    "Mix entertainment (70%) with promotion (30%) for best engagement"
-                  ]}
-                />
-
-                <ProTipCard
-                  category="Monetization Hacks"
-                  tips={[
-                    "Bundle products together for 3x higher sales - 'Ultimate Creator Pack'",
-                    "Create 'lite' and 'pro' versions of products for price anchoring",
-                    "Use AI-generated thumbnails with high contrast colors for clicks",
-                    "Add affiliate links in every video description - passive income layer"
-                  ]}
-                />
-
-                <ProTipCard
-                  category="Automation Secrets"
-                  tips={[
-                    "Let AI Manager run for 48 hours before adjusting - give it time to learn",
-                    "Create character personas for different niches - education, comedy, tech",
-                    "Set up webhook automations to cross-post content instantly",
-                    "Use job queue during off-peak hours (2am-6am) for faster processing"
-                  ]}
-                />
-
-                <ProTipCard
-                  category="Growth Tactics"
-                  tips={[
-                    "Collaborate with other Osirix users - comment and share each other's content",
-                    "Reply to every comment in first hour - boosts algorithm visibility",
-                    "Create 'behind the scenes' content showing your AI workflow - very engaging",
-                    "Run monthly contests giving away your digital products for viral growth"
-                  ]}
-                />
-
-                <ProTipCard
-                  category="Credit Optimization"
-                  tips={[
-                    "Batch create content during sales when credits are discounted",
-                    "Use shorter videos (30-60s) initially - costs less, tests faster",
-                    "Reuse successful character/logo assets across multiple projects",
-                    "Schedule posts in bulk to save on API calls and credits"
-                  ]}
-                />
-
-                <Card className="bg-gradient-to-br from-red-500/10 to-rose-500/10 border-red-500/30">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-red-500">
-                      <XCircle className="h-5 w-5" />
-                      Common Mistakes to Avoid
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      <li className="flex items-start gap-3">
-                        <span className="text-2xl">❌</span>
-                        <div>
-                          <p className="font-medium">Posting inconsistently</p>
-                          <p className="text-sm text-muted-foreground">Algorithm punishes gaps. Let AI maintain schedule.</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="text-2xl">❌</span>
-                        <div>
-                          <p className="font-medium">Over-promoting products</p>
-                          <p className="text-sm text-muted-foreground">70% value content, 30% sales. Build trust first.</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="text-2xl">❌</span>
-                        <div>
-                          <p className="font-medium">Ignoring analytics</p>
-                          <p className="text-sm text-muted-foreground">Check dashboard weekly. Double down on what works.</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="text-2xl">❌</span>
-                        <div>
-                          <p className="font-medium">Using generic content</p>
-                          <p className="text-sm text-muted-foreground">Customize AI outputs. Add your unique voice and style.</p>
-                        </div>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* CTA Section */}
-        <Card className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border-primary/30 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent gold-shimmer" />
-          <CardContent className="p-12 text-center relative z-10">
-            <Zap className="h-16 w-16 text-primary mx-auto mb-6 gold-glow float-animation" />
-            <h2 className="text-3xl font-bold mb-4">Ready to Start Your AI Money Machine?</h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              You now have the complete blueprint. Pick one strategy and start today. OZ is here to guide you every step! 🧙‍♂️✨
-            </p>
-            <div className="flex items-center justify-center gap-4 flex-wrap">
-              <Link href="/ai/manager">
-                <Button size="lg" className="gap-2">
-                  <Play className="h-5 w-5" />
-                  Start AI Manager
-                </Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button size="lg" variant="outline" className="gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  View Dashboard
-                </Button>
-              </Link>
+        {/* Info Card */}
+        <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+          <CardContent className="p-8">
+            <div className="flex items-start gap-4">
+              <Sparkles className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="text-xl font-bold mb-2">How OZ Works</h3>
+                <p className="text-muted-foreground mb-4">
+                  OZ is your autonomous money-making AI that executes workflows 24/7. Unlike a guide that just advises, 
+                  OZ actively creates products, generates content, schedules posts, and optimizes everything for maximum revenue.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Analyzes your profile and identifies best opportunities</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Creates products, logos, videos, and content automatically</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Lists items on marketplace with optimized pricing</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Schedules and publishes to all social media platforms</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Tracks performance and adjusts strategy in real-time</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
     </DashboardLayout>
-  );
-}
-
-// Helper Components
-function ToolCard({ icon, title, description, earnings, link }: any) {
-  return (
-    <Link href={link}>
-      <Card className="h-full hover:border-primary/50 transition-all cursor-pointer group">
-        <CardContent className="p-6">
-          <div className="mb-4 group-hover:scale-110 transition-transform">{icon}</div>
-          <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">{title}</h3>
-          <p className="text-sm text-muted-foreground mb-3">{description}</p>
-          <Badge className="bg-green-500/20 text-green-500 border-green-500/30">{earnings}</Badge>
-        </CardContent>
-      </Card>
-    </Link>
-  );
-}
-
-function MoneyStrategyCard({ number, title, description, steps, potential, difficulty, timeToProfit }: any) {
-  return (
-    <Card className="border-primary/30 hover:border-primary/50 transition-all">
-      <CardHeader>
-        <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/20 text-primary text-xl font-bold flex-shrink-0">
-            {number}
-          </div>
-          <div className="flex-1">
-            <CardTitle className="mb-2">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm">Steps:</h4>
-          <ol className="space-y-2">
-            {steps.map((step: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                {step}
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="flex items-center gap-4 pt-4 border-t border-border/50">
-          <div>
-            <p className="text-xs text-muted-foreground">Potential</p>
-            <p className="font-bold text-green-500">{potential}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Difficulty</p>
-            <Badge variant="outline">{difficulty}</Badge>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Time to Profit</p>
-            <p className="font-medium">{timeToProfit}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function SocialPlatformGuide({ icon, platform, color, steps, benefits, moneyPotential, howToEarn }: any) {
-  return (
-    <Card className={`bg-gradient-to-br ${color}`}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-3">
-          {icon}
-          <span>{platform}</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <h4 className="font-medium mb-3 flex items-center gap-2">
-            <LinkIcon className="h-4 w-4" />
-            Connection Steps:
-          </h4>
-          <ol className="space-y-2">
-            {steps.map((step: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-2 text-sm">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-background text-xs font-bold flex-shrink-0">
-                  {idx + 1}
-                </span>
-                <span className="pt-0.5">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div>
-          <h4 className="font-medium mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />
-            AI Will Handle:
-          </h4>
-          <ul className="space-y-2">
-            {benefits.map((benefit: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                {benefit}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="pt-4 border-t border-border/50">
-          <p className="text-sm text-muted-foreground mb-1">Money Potential:</p>
-          <p className="font-bold text-lg text-green-500 mb-3">{moneyPotential}</p>
-          {howToEarn && (
-            <>
-              <p className="text-sm text-muted-foreground mb-1">How to Earn:</p>
-              <p className="text-sm">{howToEarn}</p>
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function AutomationFlow() {
-  const steps = [
-    { icon: <Target className="h-6 w-6" />, title: "1. Set Goals", description: "Tell AI your targets (followers, revenue, content type)" },
-    { icon: <Bot className="h-6 w-6" />, title: "2. AI Plans", description: "Creates strategy, content calendar, and campaigns" },
-    { icon: <Video className="h-6 w-6" />, title: "3. Content Generated", description: "Videos, posts, products created automatically" },
-    { icon: <Calendar className="h-6 w-6" />, title: "4. Auto-Published", description: "Posted across all platforms at optimal times" },
-    { icon: <BarChart3 className="h-6 w-6" />, title: "5. Performance Tracked", description: "Analytics monitored, strategy adjusted" },
-    { icon: <DollarSign className="h-6 w-6" />, title: "6. Money Flows", description: "Revenue from ads, sales, sponsorships" }
-  ];
-
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold mb-6 text-center">The Autonomous Money Loop</h3>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {steps.map((step, idx) => (
-          <Card key={idx} className="bg-primary/5 border-primary/20 relative overflow-hidden group hover:border-primary/50 transition-all">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
-            <CardContent className="p-6 relative z-10">
-              <div className="mb-4 text-primary">{step.icon}</div>
-              <h4 className="font-semibold mb-2">{step.title}</h4>
-              <p className="text-sm text-muted-foreground">{step.description}</p>
-            </CardContent>
-            {idx < steps.length - 1 && (
-              <div className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 z-20">
-                <ArrowRight className="h-6 w-6 text-primary/50" />
-              </div>
-            )}
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function RecommendationCard({ title, recommendations }: any) {
-  return (
-    <Card className="border-primary/30">
-      <CardHeader>
-        <CardTitle className="text-lg">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {recommendations.map((rec: any, idx: number) => (
-            <div key={idx} className="p-4 bg-primary/5 rounded-lg space-y-2">
-              <h4 className="font-semibold">{rec.action}</h4>
-              <div className="grid gap-2 text-sm">
-                <p className="text-muted-foreground">
-                  <span className="font-medium text-foreground">Why:</span> {rec.why}
-                </p>
-                <p className="text-muted-foreground">
-                  <span className="font-medium text-foreground">How:</span> {rec.howTo}
-                </p>
-                <p>
-                  <Badge variant="outline" className="text-xs">⏱️ {rec.timeframe}</Badge>
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ProTipCard({ category, tips }: any) {
-  return (
-    <Card className="border-yellow-500/30 bg-yellow-500/5">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-yellow-500">
-          <Lightbulb className="h-5 w-5" />
-          {category}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-3">
-          {tips.map((tip: string, idx: number) => (
-            <li key={idx} className="flex items-start gap-3">
-              <span className="text-xl">💡</span>
-              <p className="text-sm pt-0.5">{tip}</p>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
   );
 }

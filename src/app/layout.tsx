@@ -4,6 +4,8 @@ import VisualEditsMessenger from "../visual-edits/VisualEditsMessenger";
 import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
+import CustomAutumnProvider from "@/lib/autumn-provider";
+import SupportChat from "@/components/SupportChat";
 
 export const metadata: Metadata = {
   title: "Osirix - AI Content Creation Platform",
@@ -29,8 +31,11 @@ export default function RootLayout({
           data-debug="true"
           data-custom-data='{"appName": "Osirix", "version": "1.0.0"}'
         />
-        {children}
+        <CustomAutumnProvider>
+          {children}
+        </CustomAutumnProvider>
         <Toaster />
+        <SupportChat />
         <VisualEditsMessenger />
       </body>
     </html>

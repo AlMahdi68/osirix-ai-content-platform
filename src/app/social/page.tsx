@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Calendar, Send, Twitter, Facebook, Instagram, Linkedin, Clock, CheckCircle, XCircle, Edit2, Trash2, MoreVertical, Lock, Link as LinkIcon, Youtube, Unlink, RefreshCw, TrendingUp, Eye, Heart, MousePointerClick } from "lucide-react";
+import { Plus, Calendar, Send, Twitter, Facebook, Instagram, Linkedin, Clock, CheckCircle, XCircle, Edit2, Trash2, MoreVertical, Lock, Link as LinkIcon, Youtube, Unlink, RefreshCw, TrendingUp, Eye, Heart, MousePointerClick, Settings } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useCustomer } from "autumn-js/react";
@@ -410,81 +410,89 @@ export default function SocialPage() {
             <h2 className="text-3xl font-bold tracking-tight">Social Media</h2>
             <p className="text-muted-foreground">Connect accounts and schedule posts automatically</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) setEditingPost(null);
-          }}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Schedule Post
+          <div className="flex items-center gap-2">
+            <Link href="/settings/social-accounts">
+              <Button variant="outline" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Manage Accounts
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{editingPost ? "Edit Post" : "Schedule Social Media Post"}</DialogTitle>
-                <DialogDescription>
-                  {editingPost ? "Update your scheduled post" : "Create and schedule content for your social platforms"}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={editingPost ? handleEditPost : handleCreatePost} className="space-y-4">
-                {!editingPost && (
+            </Link>
+            <Dialog open={dialogOpen} onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) setEditingPost(null);
+            }}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Schedule Post
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{editingPost ? "Edit Post" : "Schedule Social Media Post"}</DialogTitle>
+                  <DialogDescription>
+                    {editingPost ? "Update your scheduled post" : "Create and schedule content for your social platforms"}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={editingPost ? handleEditPost : handleCreatePost} className="space-y-4">
+                  {!editingPost && (
+                    <div className="space-y-2">
+                      <Label htmlFor="platform">Platform</Label>
+                      <Select name="platform" required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select platform" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isConnected("twitter") && <SelectItem value="twitter">Twitter</SelectItem>}
+                          {isConnected("facebook") && <SelectItem value="facebook">Facebook</SelectItem>}
+                          {isConnected("instagram") && <SelectItem value="instagram">Instagram</SelectItem>}
+                          {isConnected("linkedin") && <SelectItem value="linkedin">LinkedIn</SelectItem>}
+                          {isConnected("youtube") && <SelectItem value="youtube">YouTube</SelectItem>}
+                        </SelectContent>
+                      </Select>
+                      {accounts.filter(a => a.isConnected).length === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          No platforms connected. <Link href="/settings/social-accounts" className="text-primary hover:underline">Connect accounts</Link> to get started.
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <div className="space-y-2">
-                    <Label htmlFor="platform">Platform</Label>
-                    <Select name="platform" required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select platform" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {isConnected("twitter") && <SelectItem value="twitter">Twitter</SelectItem>}
-                        {isConnected("facebook") && <SelectItem value="facebook">Facebook</SelectItem>}
-                        {isConnected("instagram") && <SelectItem value="instagram">Instagram</SelectItem>}
-                        {isConnected("linkedin") && <SelectItem value="linkedin">LinkedIn</SelectItem>}
-                        {isConnected("youtube") && <SelectItem value="youtube">YouTube</SelectItem>}
-                      </SelectContent>
-                    </Select>
-                    {accounts.filter(a => a.isConnected).length === 0 && (
-                      <p className="text-sm text-muted-foreground">
-                        No platforms connected. Go to Accounts tab to connect.
-                      </p>
+                    <Label htmlFor="content">Content</Label>
+                    <Textarea
+                      id="content"
+                      name="content"
+                      placeholder="What would you like to share?"
+                      rows={4}
+                      required
+                      disabled={creating}
+                      defaultValue={editingPost?.content || ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="scheduledAt">Schedule Date & Time (Optional)</Label>
+                    <Input
+                      id="scheduledAt"
+                      name="scheduledAt"
+                      type="datetime-local"
+                      disabled={creating}
+                      defaultValue={editingPost?.scheduledAt ? new Date(editingPost.scheduledAt).toISOString().slice(0, 16) : ""}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="submit" className="flex-1" disabled={creating}>
+                      {creating ? "Saving..." : editingPost ? "Update Post" : "Schedule Post"}
+                    </Button>
+                    {editingPost && (
+                      <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); setEditingPost(null); }} disabled={creating}>
+                        Cancel
+                      </Button>
                     )}
                   </div>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="content">Content</Label>
-                  <Textarea
-                    id="content"
-                    name="content"
-                    placeholder="What would you like to share?"
-                    rows={4}
-                    required
-                    disabled={creating}
-                    defaultValue={editingPost?.content || ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="scheduledAt">Schedule Date & Time (Optional)</Label>
-                  <Input
-                    id="scheduledAt"
-                    name="scheduledAt"
-                    type="datetime-local"
-                    disabled={creating}
-                    defaultValue={editingPost?.scheduledAt ? new Date(editingPost.scheduledAt).toISOString().slice(0, 16) : ""}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button type="submit" className="flex-1" disabled={creating}>
-                    {creating ? "Saving..." : editingPost ? "Update Post" : "Schedule Post"}
-                  </Button>
-                  {editingPost && (
-                    <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); setEditingPost(null); }} disabled={creating}>
-                      Cancel
-                    </Button>
-                  )}
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -662,10 +670,20 @@ export default function SocialPage() {
           <TabsContent value="accounts" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Connect Social Media Accounts</CardTitle>
-                <CardDescription>
-                  Link your social media accounts to enable automated posting
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Connect Social Media Accounts</CardTitle>
+                    <CardDescription>
+                      Link your social media accounts to enable automated posting
+                    </CardDescription>
+                  </div>
+                  <Link href="/settings/social-accounts">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Settings className="h-4 w-4" />
+                      Advanced Settings
+                    </Button>
+                  </Link>
+                </div>
               </CardHeader>
               <CardContent>
                 {accountsLoading ? (
@@ -759,13 +777,24 @@ export default function SocialPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Visit the OZ Guide for step-by-step instructions on connecting each social media platform.
+                  Visit the OZ Guide for step-by-step instructions on connecting each social media platform, or use our support chat for instant help.
                 </p>
-                <Link href="/oz">
-                  <Button variant="outline">
-                    Visit OZ Guide
+                <div className="flex gap-2">
+                  <Link href="/oz">
+                    <Button variant="outline">
+                      Visit OZ Guide
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const event = new CustomEvent("openSupportChat");
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    Chat with Support
                   </Button>
-                </Link>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

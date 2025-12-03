@@ -38,6 +38,7 @@ import {
   Wallet,
   DollarSign,
   Eye,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import PlanBadge from "@/components/PlanBadge";
@@ -243,6 +244,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings/social-accounts">
+                    <LinkIcon className="mr-2 h-4 w-4" />
+                    Social Accounts
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

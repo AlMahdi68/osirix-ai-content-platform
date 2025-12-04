@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import PlanUsageIndicator from "@/components/autumn/plan-usage-indicator";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
+import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 import { 
   Coins, 
   Video, 
@@ -81,6 +82,7 @@ export default function DashboardPage() {
   return (
     <>
       {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
+      <InteractiveTutorial />
       
       <DashboardLayout>
         <div className="space-y-8">
